@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emma's 4th Grade Adventure</title>
+<style>
+  :root{
+    --deep-rose:#9d174d; --deep-rose-2:#a83254;
+    --pink:#db2777; --pink-hover:#be185d; --accent:#ec4899;
+    --blush:#fdf2f8; --blush-2:#fce7f3;
+    --ink:#3a1226; --muted:#8a5a72;
+    --good:#15803d; --good-bg:#dcfce7; --bad:#b91c1c; --bad-bg:#fee2e2;
+    --card-shadow:0 4px 14px rgba(157,23,77,.12);
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,var(--blush) 0%,var(--blush-2) 100%);
+    color:var(--ink); min-height:100vh; -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:1200px;margin:0 auto;padding:16px}
+
+  /* Header */
+  header.app-header{
+    background:linear-gradient(135deg,var(--deep-rose) 0%,var(--pink) 100%);
+    color:#fff;border-radius:var(--radius);padding:20px 22px;
+    box-shadow:var(--card-shadow);position:relative;overflow:hidden;
+  }
+  header.app-header h1{margin:0;font-size:1.9rem;letter-spacing:.3px}
+  header.app-header p.sub{margin:6px 0 0;opacity:.95;font-size:1rem}
+  .header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+  .header-actions{display:flex;gap:10px;flex-wrap:wrap}
+  button.pill{
+    background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.55);
+    padding:10px 16px;border-radius:999px;font-size:.95rem;font-weight:700;cursor:pointer;
+    transition:background .15s,transform .1s;
+  }
+  button.pill:hover{background:rgba(255,255,255,.32)}
+  button.pill:active{transform:scale(.97)}
+  button.pill:focus-visible{outline:3px solid #fff;outline-offset:2px}
+
+  /* Progress */
+  .progress-panel{
+    background:#fff;border-radius:var(--radius);padding:16px 20px;margin-top:16px;
+    box-shadow:var(--card-shadow);
+  }
+  .progress-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .progress-top strong{color:var(--deep-rose);font-size:1.05rem}
+  .streak-msg{color:var(--muted);font-weight:600;font-size:.95rem}
+  .bar-track{background:var(--blush-2);border-radius:999px;height:22px;overflow:hidden;border:1px solid #f3c4dc}
+  .bar-fill{
+    height:100%;width:0%;border-radius:999px;
+    background:linear-gradient(90deg,var(--accent),var(--pink));
+    transition:width .5s ease;display:flex;align-items:center;justify-content:flex-end;
+    color:#fff;font-size:.75rem;font-weight:800;padding-right:8px;min-width:2ch;
+  }
+
+  /* Weeks accordion */
+  .weeks{display:flex;flex-direction:column;gap:14px;margin-top:20px}
+  .week-panel{border-radius:18px;overflow:hidden;box-shadow:var(--card-shadow);background:#fff}
+  .week-header{
+    width:100%;border:none;cursor:pointer;color:#fff;text-align:left;
+    display:flex;align-items:center;gap:14px;padding:16px 18px;font-family:inherit;
+    transition:filter .15s;
+  }
+  .week-header:hover{filter:brightness(1.05)}
+  .week-header:focus-visible{outline:3px solid var(--deep-rose);outline-offset:-3px}
+  .wh-emoji{font-size:2rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 3px rgba(0,0,0,.2))}
+  .wh-text{display:flex;flex-direction:column;flex:1;min-width:0}
+  .wh-title{font-size:1.15rem;font-weight:900;letter-spacing:.2px}
+  .wh-blurb{font-size:.82rem;opacity:.92;font-weight:600}
+  .wh-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+  .wh-count{font-size:.85rem;font-weight:800;background:rgba(255,255,255,.22);padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .wh-ring{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative}
+  .wh-ring::before{content:"";position:absolute;inset:4px;background:inherit;border-radius:50%;background:transparent}
+  .wh-ring span{font-size:.66rem;font-weight:900;color:var(--deep-rose);background:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .wh-chevron{font-size:1.3rem;transition:transform .25s;display:inline-block}
+  .week-panel.open .wh-chevron{transform:rotate(90deg)}
+  .week-body{max-height:0;overflow:hidden;transition:max-height .35s ease;background:var(--blush)}
+  .week-panel.open .week-body{max-height:3000px}
+  .days-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 18px}
+  .week-panel.locked{opacity:.72;filter:grayscale(.4)}
+  .week-panel.locked .week-header{cursor:not-allowed}
+  .week-panel.locked .wh-chevron{display:none}
+  .locked-note{padding:18px;color:var(--muted);font-weight:600;line-height:1.5}
+
+  .day-card{
+    background:#fff;border:2px solid #f6d3e4;border-radius:14px;padding:12px 14px;
+    cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s;box-shadow:0 2px 6px rgba(157,23,77,.08);
+    position:relative;display:flex;flex-direction:column;
+  }
+  .day-card:hover{transform:translateY(-3px);box-shadow:var(--card-shadow);border-color:var(--accent)}
+  .day-card:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+  .day-card .daynum{font-size:.78rem;font-weight:800;color:var(--pink);text-transform:uppercase;letter-spacing:.4px;padding-right:22px}
+  .day-card .topic-line{font-size:.86rem;font-weight:700;line-height:1.3;margin-top:6px;display:flex;gap:6px;align-items:flex-start}
+  .day-card .topic-line .tl-icon{flex-shrink:0}
+  .day-card.done{border-color:var(--good);background:linear-gradient(180deg,#f0fdf4,#fff)}
+  .day-card .status-badge{position:absolute;top:10px;right:10px;font-size:1.1rem}
+  .day-card.done .daynum{color:var(--good)}
+  .mini-prog{height:6px;background:var(--blush-2);border-radius:999px;margin-top:auto;overflow:hidden;margin-top:10px}
+  .mini-prog span{display:block;height:100%;background:var(--pink);width:0%}
+  .placeholder-tag{display:inline-block;font-size:.62rem;font-weight:800;background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:6px;margin-top:6px;align-self:flex-start}
+
+  /* Day nav buttons */
+  .day-banner .db-actions,.day-footer{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
+  .day-banner .db-msg{margin-bottom:12px}
+  .day-banner .db-actions{margin-bottom:2px}
+  .day-footer{margin-top:16px;padding-top:14px;border-top:1px dashed #f0c4da}
+  .nav-btn{border:none;border-radius:999px;padding:10px 20px;font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit;transition:transform .1s,filter .15s}
+  .nav-btn:active{transform:scale(.96)}
+  .nav-btn:focus-visible{outline:3px solid var(--deep-rose);outline-offset:2px}
+  .nav-btn.next{background:#fff;color:var(--good)}
+  .nav-btn.back{background:rgba(255,255,255,.25);color:#fff;border:1.5px solid rgba(255,255,255,.7)}
+  .nav-btn.next:hover,.nav-btn.back:hover{filter:brightness(1.08)}
+  .nav-btn.next:disabled{opacity:.7;cursor:default}
+  .nav-btn.ghost{background:#fff;color:var(--pink);border:2px solid var(--pink)}
+  .nav-btn.ghost:hover{background:var(--blush-2)}
+
+  /* Modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(58,18,38,.55);display:none;align-items:flex-start;justify-content:center;
+    padding:20px;z-index:100;overflow:hidden;
+  }
+  .modal-overlay.open{display:flex}
+  .modal{
+    background:var(--blush);border-radius:20px;max-width:900px;width:100%;margin:0 auto;
+    box-shadow:0 20px 60px rgba(58,18,38,.4);position:relative;
+    display:flex;flex-direction:column;max-height:calc(100vh - 40px);overflow:hidden;
+  }
+  .modal-header{
+    background:linear-gradient(135deg,var(--deep-rose),var(--pink));color:#fff;
+    padding:18px 22px;border-radius:20px 20px 0 0;flex:0 0 auto;z-index:2;
+  }
+  .modal-header h2{margin:0;font-size:1.3rem}
+  .modal-header .stds{font-size:.82rem;opacity:.95;margin-top:4px}
+  .modal-close{
+    position:absolute;top:14px;right:16px;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.6);
+    color:#fff;width:38px;height:38px;border-radius:50%;font-size:1.2rem;cursor:pointer;line-height:1;
+  }
+  .modal-close:hover{background:rgba(255,255,255,.35)}
+  .modal-close:focus-visible{outline:3px solid #fff;outline-offset:2px}
+  .modal-body{padding:20px 22px 26px;overflow-y:auto;flex:1 1 auto;-webkit-overflow-scrolling:touch}
+  .section-label{font-size:1.05rem;font-weight:800;color:var(--deep-rose);margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+  .section-label:first-child{margin-top:0}
+
+  /* Question card */
+  .q{background:#fff;border:2px solid #f6d3e4;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 6px rgba(157,23,77,.06)}
+  .q.solved{border-color:var(--good);background:linear-gradient(180deg,#f6fef9,#fff)}
+  .q-prompt{font-size:1.02rem;line-height:1.5;margin-bottom:12px}
+  .q-num{font-weight:800;color:var(--pink);margin-right:6px}
+  fieldset.choices{border:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+  fieldset.choices legend{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  label.choice{
+    display:flex;align-items:center;gap:10px;background:var(--blush);border:2px solid #f6d3e4;border-radius:10px;
+    padding:10px 12px;cursor:pointer;font-size:1rem;transition:border-color .12s,background .12s;
+  }
+  label.choice:hover{border-color:var(--accent)}
+  label.choice input{accent-color:var(--pink);width:18px;height:18px}
+  label.choice.chosen{border-color:var(--pink);background:var(--blush-2)}
+  input.text-answer{
+    font-size:1.05rem;padding:10px 12px;border:2px solid #f0b9d4;border-radius:10px;width:100%;max-width:260px;
+    font-family:inherit;color:var(--ink);
+  }
+  input.text-answer:focus-visible{outline:3px solid var(--accent);outline-offset:1px;border-color:var(--pink)}
+  .check-btn{
+    margin-top:12px;background:var(--pink);color:#fff;border:none;border-radius:10px;padding:10px 20px;
+    font-size:.98rem;font-weight:800;cursor:pointer;transition:background .15s,transform .1s;
+  }
+  .check-btn:hover{background:var(--pink-hover)}
+  .check-btn:active{transform:scale(.97)}
+  .check-btn:focus-visible{outline:3px solid var(--deep-rose);outline-offset:2px}
+  .check-btn:disabled{background:var(--good);cursor:default}
+  .feedback{margin-top:12px;border-radius:10px;padding:0;font-size:.98rem;line-height:1.5}
+  .feedback.show{padding:12px 14px}
+  .feedback.good{background:var(--good-bg);color:var(--good);border:1.5px solid #86efac}
+  .feedback.bad{background:var(--bad-bg);color:var(--bad);border:1.5px solid #fca5a5}
+  .feedback .fb-title{font-weight:800;margin-bottom:6px}
+  .hint-step{display:flex;align-items:center;gap:6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.95rem;color:var(--ink);padding:2px 0}
+  .hint-step .arrow{color:var(--pink);font-weight:800}
+
+  /* Reading module: passage side-by-side with questions */
+  .reading-module{background:#fff;border:2px solid #f6d3e4;border-radius:14px;padding:16px;margin-bottom:16px}
+  .reading-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .passage-box{background:var(--blush);border-left:5px solid var(--accent);border-radius:10px;padding:14px 16px}
+  .passage-box h4{margin:0 0 8px;color:var(--deep-rose);font-size:.95rem}
+  .passage-box p{margin:0;line-height:1.6;font-size:1rem}
+  .rq-list .q{border:none;box-shadow:none;padding:0 0 6px;margin-bottom:14px;border-bottom:1px dashed #f0c4da;background:transparent}
+  .rq-list .q:last-child{border-bottom:none}
+  .rq-list .q.solved{background:transparent}
+
+  /* Fractions & exponents */
+  .frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 3px;line-height:1}
+  .frac .num{border-bottom:2px solid currentColor;padding:0 4px 1px}
+  .frac .den{padding:1px 4px 0}
+  sup{font-size:.72em}
+
+  /* Day complete banner */
+  .day-banner{
+    display:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border-radius:14px;
+    padding:16px 18px;text-align:center;font-size:1.1rem;font-weight:800;margin-bottom:16px;animation:pop .4s ease;
+  }
+  .day-banner.show{display:block}
+  @keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+  .reset-day-btn{
+    background:#fff;border:2px solid var(--pink);color:var(--pink);border-radius:10px;padding:8px 16px;
+    font-weight:700;cursor:pointer;font-size:.9rem;margin-top:6px;
+  }
+  .reset-day-btn:hover{background:var(--blush-2)}
+
+  /* Confetti canvas */
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:200;display:none}
+
+  /* Analytics */
+  .analytics-modal .modal-body{padding:22px}
+  .cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+  .stat-card{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:var(--card-shadow);border:2px solid #f6d3e4}
+  .stat-card .num{font-size:1.7rem;font-weight:900;color:var(--pink)}
+  .stat-card .lbl{font-size:.78rem;color:var(--muted);font-weight:700;margin-top:2px}
+  .analytics-section{background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:16px;box-shadow:0 2px 6px rgba(157,23,77,.06)}
+  .analytics-section h3{margin:0 0 12px;color:var(--deep-rose);font-size:1.05rem}
+  .subj-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .subj-row .subj-name{width:90px;font-weight:800;color:var(--ink)}
+  .subj-bar-track{flex:1;background:var(--blush-2);border-radius:999px;height:20px;overflow:hidden;border:1px solid #f3c4dc}
+  .subj-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--pink));display:flex;align-items:center;justify-content:flex-end;color:#fff;font-size:.72rem;font-weight:800;padding-right:6px;min-width:2ch}
+  .subj-meta{width:110px;font-size:.82rem;color:var(--muted);text-align:right}
+  .topic-item{border-left:5px solid var(--pink);background:var(--blush);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+  .topic-item.strong{border-left-color:var(--good);background:#f0fdf4}
+  .topic-item .std-code{font-size:.72rem;font-weight:800;color:var(--pink);letter-spacing:.3px}
+  .topic-item.strong .std-code{color:var(--good)}
+  .topic-item .topic-title{font-weight:700;margin:2px 0}
+  .topic-item .topic-meta{font-size:.82rem;color:var(--muted)}
+  .empty-note{color:var(--muted);font-style:italic;font-size:.92rem}
+  .reset-analytics-btn{background:#fff;border:2px solid var(--bad);color:var(--bad);border-radius:10px;padding:10px 18px;font-weight:800;cursor:pointer}
+  .reset-analytics-btn:hover{background:var(--bad-bg)}
+
+  /* Responsive */
+  @media (max-width:900px){
+    .days-grid{grid-template-columns:repeat(2,1fr)}
+    .cards-row{grid-template-columns:repeat(2,1fr)}
+    .reading-grid{grid-template-columns:1fr}
+    .wh-blurb{display:none}
+  }
+  @media (max-width:560px){
+    .days-grid{grid-template-columns:1fr}
+    .cards-row{grid-template-columns:1fr}
+    .wh-count{display:none}
+    header.app-header h1{font-size:1.5rem}
+  }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="wrap">
+  <header class="app-header">
+    <div class="header-row">
+      <div>
+        <h1>🌸 Emma &amp; Leilani's 4th Grade Adventure</h1>
+        <p class="sub" id="welcomeMsg">Welcome back, Emma! Let's keep your 28-day launch going.</p>
+      </div>
+      <div class="header-actions">
+        <button class="pill" id="analyticsBtn" aria-label="Open Parent Analytics dashboard">📊 Parent Analytics</button>
+      </div>
+    </div>
+    <div class="progress-panel">
+      <div class="progress-top">
+        <strong>Emma's Progress</strong>
+        <span class="streak-msg" id="streakMsg"></span>
+      </div>
+      <div class="bar-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Overall challenge completion" id="progressBar">
+        <div class="bar-fill" id="progressFill">0%</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="weeks" id="weeksGrid"></div>
+</div>
+
+<!-- Day modal -->
+<div class="modal-overlay" id="dayOverlay" role="dialog" aria-modal="true" aria-labelledby="dayModalTitle">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="modal-close" id="dayClose" aria-label="Close day and return to dashboard">✕</button>
+      <h2 id="dayModalTitle"></h2>
+      <div class="stds" id="dayModalStds"></div>
+    </div>
+    <div class="modal-body" id="dayModalBody"></div>
+  </div>
+</div>
+
+<!-- Analytics modal -->
+<div class="modal-overlay analytics-modal" id="analyticsOverlay" role="dialog" aria-modal="true" aria-labelledby="analyticsTitle">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="modal-close" id="analyticsClose" aria-label="Close analytics dashboard">✕</button>
+      <h2 id="analyticsTitle">📊 Parent Analytics — Emma</h2>
+      <div class="stds">A first-attempt view of where Emma is thriving and where she needs review.</div>
+    </div>
+    <div class="modal-body" id="analyticsBody"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Emma & Leilani's 4th Grade Adventure — self-contained app
+   ============================================================ */
+/* ===== PER-CHILD CONFIG =====
+   Emma is the default (pink). A copy of this file named leilani.html — or
+   opening it with #child=leilani — becomes Leilani's purple version.
+   Each child keeps her own separate saved progress. */
+const CHILD = /leilani/i.test((location.pathname || "") + location.hash + location.search) ? "leilani" : "emma";
+const NAME = (CHILD === "leilani") ? "Leilani" : "Emma";
+const SWAP_NAMES = (CHILD === "leilani");
+const STORAGE_KEY = (CHILD === "leilani") ? "leilani_4th_grade_v1" : "emma_4th_grade_v1";
+const STUDENT = NAME;
+const FLOWER = (CHILD === "leilani") ? "🪻" : "🌸";
+
+/* Apply the purple theme for Leilani (overrides the pink CSS variables) */
+if(CHILD === "leilani"){
+  const s = document.createElement("style");
+  s.textContent = `:root{--deep-rose:#6b21a8;--deep-rose-2:#7e22ce;--pink:#9333ea;--pink-hover:#7e22ce;--accent:#a855f7;--blush:#faf5ff;--blush-2:#f3e8ff;--ink:#2e1065;--muted:#7c6a93;--card-shadow:0 4px 14px rgba(107,33,168,.14);}
+    .day-card,.q,.reading-module,.stat-card{border-color:#e9d5ff}
+    .bar-track,.subj-bar-track{border-color:#ddd6fe}
+    input.text-answer{border-color:#c4b5fd}
+    .rq-list .q,.day-footer{border-color:#e9d5ff}
+    .placeholder-tag{background:#ede9fe;color:#5b21b6}
+    .modal-overlay{background:rgba(46,16,101,.55)}`;
+  (document.head || document.documentElement).appendChild(s);
+}
+
+/* Swap the names Emma<->Leilani inside a string (personalises shared stories per file) */
+function swapEL(s){
+  return (typeof s === "string")
+    ? s.replace(/Emma|Leilani/g, m => (m === "Emma" ? "Leilani" : "Emma"))
+    : s;
+}
+function deepSwapNames(cur){
+  const arr = a => Array.isArray(a) ? a.map(swapEL) : a;
+  cur.forEach(d=>{
+    d.mathTitle = swapEL(d.mathTitle); d.elaTitle = swapEL(d.elaTitle);
+    d.math.forEach(q=>{ q.prompt=swapEL(q.prompt); q.choices=arr(q.choices); q.hint=arr(q.hint); q.accept=arr(q.accept); });
+    d.reading.forEach(m=>{ m.passage=swapEL(m.passage); m.topic=swapEL(m.topic);
+      m.questions.forEach(q=>{ q.prompt=swapEL(q.prompt); q.choices=arr(q.choices); q.hint=arr(q.hint); q.accept=arr(q.accept); }); });
+  });
+}
+
+/* ---------- Visual math helpers ---------- */
+function frac(num, den){
+  return `<span class="frac" aria-label="${num} over ${den}"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+}
+function exp(base, power){
+  return `<span aria-label="${base} to the power of ${power}">${base}<sup>${power}</sup></span>`;
+}
+
+/* ---------- Forgiving text normalization ---------- */
+function normalize(s){
+  return String(s)
+    .trim()
+    .toLowerCase()
+    .replace(/[.,!?;:]+$/g, "")
+    .replace(/\s+/g, " ");
+}
+function textCorrect(val, acceptable){
+  const n = normalize(val);
+  if(n === "") return false;
+  return acceptable.map(normalize).includes(n);
+}
+
+/* ============================================================
+   CURRICULUM DATA
+   ============================================================ */
+
+/* Standards table — verified Florida B.E.S.T. codes (day headers) */
+const STANDARDS = [
+  /* ---- Week 1 — 3rd Grade Mastery: Numbers, Operations & Fractions (authored) ---- */
+  {day:1,  week:1, mathStd:"MA.3.NSO.2.1", mathTitle:"Adding & Subtracting Multi-Digit Numbers", elaStd:"ELA.3.R.1.1", elaTitle:"Character & Plot"},
+  {day:2,  week:1, mathStd:"MA.3.NSO.2.4", mathTitle:"Multiplication & Division Facts", elaStd:"ELA.3.R.1.2", elaTitle:"Finding the Theme"},
+  {day:3,  week:1, mathStd:"MA.3.FR.1.1",  mathTitle:"Understanding Unit Fractions", elaStd:"ELA.3.R.1.4", elaTitle:"Elements of Poetry"},
+  {day:4,  week:1, mathStd:"MA.3.FR.2.2",  mathTitle:"Equivalent Fractions", elaStd:"ELA.3.R.3.1", elaTitle:"Figurative Language (Similes)"},
+  {day:5,  week:1, mathStd:"MA.3.AR.1.2",  mathTitle:"Addition & Subtraction Word Problems", elaStd:"ELA.3.R.2.2", elaTitle:"Central Idea & Details"},
+  {day:6,  week:1, mathStd:"MA.3.GR.2.2",  mathTitle:"Area of Rectangles", elaStd:"ELA.3.R.3.2", elaTitle:"Summarizing a Text"},
+  {day:7,  week:1, mathStd:"REVIEW", mathTitle:"Weekly Review 1 — 3rd Grade Mastery", elaStd:"REVIEW", elaTitle:"Mixed Skills (Week 1)", review:true},
+
+  /* ---- Week 2 — 3rd Grade Mastery: Reasoning, Time, Geometry & Data ---- */
+  {day:8,  week:2, mathStd:"MA.3.NSO.1.3", mathTitle:"Comparing & Rounding Whole Numbers", elaStd:"ELA.3.R.1.3", elaTitle:"Character Perspectives"},
+  {day:9,  week:2, mathStd:"MA.3.AR.2.3",  mathTitle:"Finding the Unknown Number (× and ÷)", elaStd:"ELA.3.R.2.1", elaTitle:"Text Features & Structure"},
+  {day:10, week:2, mathStd:"MA.3.DP.1.1",  mathTitle:"Reading & Making Graphs", elaStd:"ELA.3.R.2.3", elaTitle:"Author's Purpose"},
+  {day:11, week:2, mathStd:"MA.3.FR.2.1",  mathTitle:"Comparing Fractions", elaStd:"ELA.3.R.2.4", elaTitle:"Author's Claim & Evidence"},
+  {day:12, week:2, mathStd:"MA.3.M.2.2",   mathTitle:"Telling Time & Elapsed Time", elaStd:"ELA.3.R.3.3", elaTitle:"Comparing Two Texts"},
+  {day:13, week:2, mathStd:"MA.3.GR.1.2",  mathTitle:"2-D Figures, Quadrilaterals & Perimeter", elaStd:"ELA.3.V.1.3", elaTitle:"Using Context Clues"},
+  {day:14, week:2, mathStd:"REVIEW", mathTitle:"Weekly Review 2 — 3rd Grade Mastery", elaStd:"REVIEW", elaTitle:"Mixed Skills (Week 2)", review:true},
+
+  /* ---- Week 3 — Bridge to 4th Grade: Big Numbers, Operations & Decimals ---- */
+  {day:15, week:3, mathStd:"MA.4.NSO.1.1", mathTitle:"Place Value to 1,000,000", elaStd:"ELA.4.R.1.1", elaTitle:"Analyzing Plot & Character"},
+  {day:16, week:3, mathStd:"MA.4.NSO.1.3", mathTitle:"Comparing, Ordering & Rounding Multi-Digit Numbers", elaStd:"ELA.4.R.1.2", elaTitle:"Theme Development"},
+  {day:17, week:3, mathStd:"MA.4.NSO.2.2", mathTitle:"Multiplying 2- and 3-Digit Numbers", elaStd:"ELA.4.R.2.1", elaTitle:"Text Features & Structure"},
+  {day:18, week:3, mathStd:"MA.4.NSO.2.4", mathTitle:"Dividing with Remainders", elaStd:"ELA.4.R.2.2", elaTitle:"Central Idea & Details"},
+  {day:19, week:3, mathStd:"MA.4.NSO.1.5", mathTitle:"Comparing & Ordering Decimals", elaStd:"ELA.4.R.2.3", elaTitle:"Author's Perspective"},
+  {day:20, week:3, mathStd:"MA.4.NSO.2.7", mathTitle:"Adding & Subtracting Decimals", elaStd:"ELA.4.V.1.2", elaTitle:"Greek & Latin Roots and Affixes"},
+  {day:21, week:3, mathStd:"REVIEW", mathTitle:"Weekly Review 3 — The Bridge (incl. Decimals & Factors)", elaStd:"REVIEW", elaTitle:"Mixed Skills (Week 3)", review:true},
+
+  /* ---- Week 4 — 4th Grade Launch: Fractions, Angles, Measurement & Data ---- */
+  {day:22, week:4, mathStd:"MA.4.FR.1.3",  mathTitle:"Equivalent Fractions & Fraction–Decimal Links", elaStd:"ELA.4.R.2.4", elaTitle:"Author's Claim & Evidence"},
+  {day:23, week:4, mathStd:"MA.4.FR.2.2",  mathTitle:"Adding & Subtracting Fractions", elaStd:"ELA.4.R.3.1", elaTitle:"Interpreting Figurative Language"},
+  {day:24, week:4, mathStd:"MA.4.FR.2.4",  mathTitle:"Multiplying Fractions by a Whole Number", elaStd:"ELA.4.V.1.3", elaTitle:"Words in Context"},
+  {day:25, week:4, mathStd:"MA.4.GR.1.1",  mathTitle:"Classifying & Measuring Angles", elaStd:"ELA.4.C.1.4", elaTitle:"Organized Informative Writing"},
+  {day:26, week:4, mathStd:"MA.4.M.1.2",   mathTitle:"Measurement Conversions (Customary & Metric)", elaStd:"ELA.4.C.3.1", elaTitle:"Grammar & Conventions"},
+  {day:27, week:4, mathStd:"MA.4.DP.1.1",  mathTitle:"Data: Line Plots, Mode, Median & Range", elaStd:"ELA.4.R.3.3", elaTitle:"Comparing Accounts & Sources"},
+  {day:28, week:4, mathStd:"GRAD", mathTitle:"Emma's Comprehensive 4th Grade Graduation Quiz", elaStd:"GRAD", elaTitle:"Comprehensive Reading Review", grad:true},
+];
+
+const DAY1 = {
+  math:[
+    {id:"d1-m1", type:"text", prompt:`Emma is collecting stickers. She has 3,456 stickers and her friend gives her 2,178 more. How many stickers does Emma have now?`,
+     accept:["5634","5,634"],
+     hint:["3456 + 2178","6 + 8 = 14  → write 4, carry 1","5 + 7 + 1 = 13 → write 3, carry 1","4 + 1 + 1 = 6","3 + 2 = 5","Answer → 5,634"]},
+    {id:"d1-m2", type:"text", prompt:`Solve: 7,204 − 3,589 = ?`,
+     accept:["3615","3,615"],
+     hint:["Line up place values","4 − 9 → borrow: 14 − 9 = 5","0 becomes 9, 9 − 8 = 1","2 becomes 1, 1 − 5 → borrow: 11 − 5 = 6","7 becomes 6, 6 − 3 = 3","Answer → 3,615"]},
+    {id:"d1-m3", type:"mc", prompt:`Emma read 1,250 pages over the summer and 875 more in the fall. How many pages did she read in all?`,
+     choices:["1,925","2,025","2,125","2,215"], answer:2,
+     hint:["1250 + 875","0 + 5 = 5","5 + 7 = 12 → write 2, carry 1","2 + 8 + 1 = 11 → write 1, carry 1","1 + 0 + 1 = 2","Answer → 2,125"]},
+    {id:"d1-m4", type:"text", prompt:`A stadium seats 8,000 people. If 4,675 tickets are sold, how many seats are still empty?`,
+     accept:["3325","3,325"],
+     hint:["8000 − 4675","Borrow across the zeros","10 − 5 = 5","9 − 7 = 2","9 − 6 = 3","7 − 4 = 3","Answer → 3,325"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.1.1", topic:"Character & Plot",
+     passage:`Emma found a small, shivering puppy hiding under the porch during a rainstorm. She wanted to help, but she was afraid the puppy might be scared of her. Slowly, Emma sat down and held out a piece of her sandwich. After a few minutes, the puppy crept forward and gently took the food. By the time the rain stopped, the puppy was curled up asleep in her lap.`,
+     questions:[
+       {id:"d1-r1-1", type:"mc", prompt:`What problem did Emma face at the beginning of the story?`,
+        choices:["She lost her sandwich","A cold, scared puppy was hiding under the porch","She could not find her way home","The rain would not stop"], answer:1,
+        hint:["Look at the first sentence","A problem is what the character must solve","She finds a shivering, scared puppy"]},
+       {id:"d1-r1-2", type:"text", prompt:`How did Emma most likely feel at the END of the story? (one word)`,
+        accept:["happy","proud","glad","joyful","content","calm"],
+        hint:["The puppy fell asleep safely in her lap","She solved the problem kindly","A positive feeling word fits best"]},
+     ]},
+    {std:"ELA.3.R.1.1", topic:"Character & Plot",
+     passage:`On the day of the science fair, Emma and her best friend Leilani discovered that their volcano would not erupt. The other students were already presenting, and Emma's hands felt sweaty while Leilani chewed her lip nervously. Instead of giving up, the two girls carefully rechecked each step of their experiment together. It was Leilani who noticed they had forgotten to add the vinegar. When Emma poured it in, the volcano bubbled over, and the whole class cheered for them both.`,
+     questions:[
+       {id:"d1-r2-1", type:"mc", prompt:`Which word BEST describes how Emma and Leilani act when the volcano fails?`,
+        choices:["Lazy","Persistent","Careless","Shy"], answer:1,
+        hint:["Think about what they DID when things went wrong","They did not give up — they kept trying together","Persistent means to keep trying"]},
+       {id:"d1-r2-2", type:"mc", prompt:`What happened RIGHT AFTER Emma added the vinegar?`,
+        choices:["Their hands got sweaty","The volcano bubbled over","They forgot a step","The fair ended"], answer:1,
+        hint:["Find the vinegar in the story","Read the sentence just after it","The volcano bubbled over"]},
+     ]},
+  ],
+};
+
+const DAY2 = {
+  math:[
+    {id:"d2-m1", type:"text", prompt:`What is 7 × 8?`,
+     accept:["56"],
+     hint:["7 × 8 means 8 groups of 7","7 × 4 = 28","28 + 28 = 56","Answer → 56"]},
+    {id:"d2-m2", type:"text", prompt:`What is 63 ÷ 9?`,
+     accept:["7"],
+     hint:["Ask: 9 × ? = 63","9 × 7 = 63","So 63 ÷ 9 = 7","Answer → 7"]},
+    {id:"d2-m3", type:"mc", prompt:`Emma puts 6 cookies on each of 8 plates. How many cookies does she have in all?`,
+     choices:["14","42","48","54"], answer:2,
+     hint:["6 cookies × 8 plates","6 × 8 = 48","Answer → 48"]},
+    {id:"d2-m4", type:"text", prompt:`Emma shares 42 crayons equally among 6 friends. How many crayons does each friend get?`,
+     accept:["7"],
+     hint:["42 ÷ 6 = ?","6 × 7 = 42","Each friend gets 7","Answer → 7"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.1.2", topic:"Finding the Theme",
+     passage:`Emma wanted to win the spelling bee more than anything. Her best friend Leilani was nervous about competing, so Emma gave up her recess to help Leilani practice the tricky words. On the day of the bee, Leilani won first place and Emma came in second. Even so, Emma felt truly proud, because she had helped her friend do her very best.`,
+     questions:[
+       {id:"d2-r1-1", type:"mc", prompt:`What is the THEME (message) of this story?`,
+        choices:["Always win first place","Helping others can matter more than winning","Spelling is easy","Never share your time"], answer:1,
+        hint:["Theme = the big lesson","Emma felt proud even in second place","Helping a friend mattered most"]},
+       {id:"d2-r1-2", type:"mc", prompt:`Why did Emma feel proud, even though she came in second?`,
+        choices:["She won a big trophy","She had helped her friend Leilani do her best","She got the day off school","She spelled every word wrong"], answer:1,
+        hint:["Read the last sentence","She helped a friend succeed","Helping mattered more than the ranking"]},
+     ]},
+    {std:"ELA.3.R.1.2", topic:"Finding the Theme",
+     passage:`A little ant worked hard all summer, storing food for the winter. A grasshopper laughed and played instead of preparing. When the cold winter came, the grasshopper was hungry, but the ant had plenty to eat. The ant kindly shared some food and reminded the grasshopper to plan ahead next time.`,
+     questions:[
+       {id:"d2-r2-1", type:"mc", prompt:`What lesson (theme) does this story teach?`,
+        choices:["Playing is always best","It is good to plan and prepare ahead","Ants cannot share","Winter never comes"], answer:1,
+        hint:["What did the hard-working ant do right?","The ant prepared; the grasshopper did not","Plan and prepare ahead"]},
+       {id:"d2-r2-2", type:"mc", prompt:`Which character prepared for winter?`,
+        choices:["The grasshopper","The ant","Both of them","Neither of them"], answer:1,
+        hint:["Who stored food all summer?","The ant worked hard","The ant prepared"]},
+     ]},
+  ],
+};
+
+const DAY3 = {
+  math:[
+    {id:"d3-m1", type:"text", prompt:`Emma cuts a pizza into 4 equal slices and eats 1 slice. What fraction of the pizza did she eat? (type it like 1/4)`,
+     accept:["1/4","one fourth","one-fourth","one quarter"],
+     hint:["1 slice out of 4 equal slices","Top number = parts you took = 1","Bottom number = total equal parts = 4",`Answer → ${frac(1,4)}`]},
+    {id:"d3-m2", type:"mc", prompt:`A unit fraction is one equal part of a whole. Which one shows one part of a whole split into 6 equal parts?`,
+     choices:[frac(1,6), frac(6,1), frac(2,6), frac(1,5)], answer:0,
+     hint:["A unit fraction always has 1 on top","6 equal parts means 6 on the bottom",`Answer → ${frac(1,6)}`]},
+    {id:"d3-m3", type:"text", prompt:`Emma's chocolate bar is split into 8 equal pieces. What unit fraction is ONE piece? (type it like 1/8)`,
+     accept:["1/8","one eighth","one-eighth"],
+     hint:["1 piece out of 8 equal pieces","Numerator (top) = 1","Denominator (bottom) = 8",`Answer → ${frac(1,8)}`]},
+    {id:"d3-m4", type:"text", prompt:`Every unit fraction has the same number on top (the numerator). What number is it?`,
+     accept:["1","one"],
+     hint:["Unit means ONE part","Examples: 1/2, 1/3, 1/4 all start with...","The numerator is always 1","Answer → 1"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.1.4", topic:"Elements of Poetry",
+     passage:`Read Emma's spring poem:<br><br><em>The garden wakes at morning light,<br>The flowers stretch up pink and bright.<br>A busy bee begins to hum,<br>And Emma knows that spring has come.</em>`,
+     questions:[
+       {id:"d3-r1-1", type:"mc", prompt:`Which two words at the ENDS of lines RHYME?`,
+        choices:["light and bright","garden and flowers","bee and morning","spring and pink"], answer:0,
+        hint:["Rhyming words end with the same sound","Look at the last word of each line","'light' and 'bright' both end in -ight"]},
+       {id:"d3-r1-2", type:"text", prompt:`A group of lines in a poem is called a s______. Type the word.`,
+        accept:["stanza"],
+        hint:["It is like a paragraph, but in a poem","It starts with 'st'","Answer → stanza"]},
+     ]},
+    {std:"ELA.3.R.1.4", topic:"Elements of Poetry",
+     passage:`Read this short poem:<br><br><em>Splish, splash, the raindrops play,<br>Pitter-patter all the day.<br>Emma splashes, laughs, and hops,<br>Until the last small raindrop stops.</em>`,
+     questions:[
+       {id:"d3-r2-1", type:"mc", prompt:`The words "Splish, splash" and "Pitter-patter" copy real sounds. What are sound words like these called?`,
+        choices:["Rhythm","Onomatopoeia","Title","Chorus"], answer:1,
+        hint:["These words SOUND like what they mean","It is a long word starting with 'ono'","Answer → onomatopoeia"]},
+       {id:"d3-r2-2", type:"mc", prompt:`Which pair of words RHYMES in this poem?`,
+        choices:["play and day","raindrops and hops","laughs and last","splash and stops"], answer:0,
+        hint:["Say each pair out loud","Match the ending sounds","'play' and 'day' both end in -ay"]},
+     ]},
+  ],
+};
+
+const DAY4 = {
+  math:[
+    {id:"d4-m1", type:"mc", prompt:`Equivalent fractions name the same amount. Which fraction is equivalent to ${frac(1,2)}?`,
+     choices:[frac(2,4), frac(1,3), frac(2,3), frac(3,4)], answer:0,
+     hint:["Half of a pizza = 2 of 4 equal slices","Multiply top and bottom by 2","1×2=2 and 2×2=4",`Answer → ${frac(2,4)}`]},
+    {id:"d4-m2", type:"text", prompt:`Emma shaded ${frac(2,4)} of her paper. What SIMPLER equivalent fraction is that? (type it like 1/2)`,
+     accept:["1/2","one half","one-half"],
+     hint:["2 and 4 can both be divided by 2","2÷2 = 1","4÷2 = 2",`Answer → ${frac(1,2)}`]},
+    {id:"d4-m3", type:"text", prompt:`Fill in the missing number: ${frac(1,3)} = ${frac("?",6)}. What number goes on top?`,
+     accept:["2"],
+     hint:["The bottom went from 3 to 6 — that is ×2","Do the same to the top: 1 × 2","1 × 2 = 2","Answer → 2"]},
+    {id:"d4-m4", type:"mc", prompt:`Which fraction is equivalent to ${frac(3,4)}?`,
+     choices:[frac(6,8), frac(4,6), frac(2,3), frac(1,2)], answer:0,
+     hint:["Multiply top and bottom by the same number","3×2 = 6 and 4×2 = 8",`Answer → ${frac(6,8)}`]},
+  ],
+  reading:[
+    {std:"ELA.3.R.3.1", topic:"Figurative Language (Similes)",
+     passage:`A simile compares two things using the words "like" or "as." In her story, Emma wrote: "My puppy is as fast as a rocket, and his fur is soft like a cloud." When he runs across the yard, he zooms by so quickly that he almost disappears.`,
+     questions:[
+       {id:"d4-r1-1", type:"mc", prompt:`Which phrase is a SIMILE?`,
+        choices:["He runs across the yard","As fast as a rocket","He almost disappears","In her story"], answer:1,
+        hint:["A simile uses 'like' or 'as'","Look for a comparison of two things","'as fast as a rocket' compares the puppy to a rocket"]},
+       {id:"d4-r1-2", type:"text", prompt:`In "soft like a cloud," the puppy's fur is being compared to a c_____. Type the word.`,
+        accept:["cloud"],
+        hint:["Find the word right after 'like a'","Clouds are soft and fluffy","Answer → cloud"]},
+     ]},
+    {std:"ELA.3.R.3.1", topic:"Figurative Language (Similes)",
+     passage:`Emma loves warm summer days. She wrote in her journal: "The sun was as bright as gold, and the ocean sparkled like a thousand tiny diamonds. I felt as happy as a bird on a spring morning."`,
+     questions:[
+       {id:"d4-r2-1", type:"mc", prompt:`What does the simile "as bright as gold" tell us about the sun?`,
+        choices:["The sun was made of gold","The sun was shiny and bright","The sun was cold","The sun was small"], answer:1,
+        hint:["A simile paints a picture — it isn't literally true","Gold is shiny and bright","It means the sun was very bright"]},
+       {id:"d4-r2-2", type:"mc", prompt:`The ocean "sparkled like a thousand tiny ______." Which word completes the simile?`,
+        choices:["rocks","diamonds","fish","boats"], answer:1,
+        hint:["Find the simile in the passage","It compares the sparkling water to something shiny","Answer → diamonds"]},
+     ]},
+  ],
+};
+
+const DAY5 = {
+  math:[
+    {id:"d5-m1", type:"text", prompt:`Emma had 345 stickers. She gave 128 to a friend, then earned 76 more. How many stickers does she have now?`,
+     accept:["293"],
+     hint:["Step 1: 345 − 128 = 217","Step 2: 217 + 76","217 + 76 = 293","Answer → 293"]},
+    {id:"d5-m2", type:"text", prompt:`Emma read 24 pages on Monday and 38 pages on Tuesday. Her goal is 100 pages. How many pages does she have left to read?`,
+     accept:["38"],
+     hint:["Step 1: 24 + 38 = 62 read so far","Step 2: 100 − 62","100 − 62 = 38","Answer → 38"]},
+    {id:"d5-m3", type:"mc", prompt:`A store had 500 apples. They sold 175 in the morning and 138 in the afternoon. How many apples are left?`,
+     choices:["187","213","325","287"], answer:0,
+     hint:["Step 1: 500 − 175 = 325","Step 2: 325 − 138","325 − 138 = 187","Answer → 187"]},
+    {id:"d5-m4", type:"text", prompt:`Emma's team scored 6, 4, and 9 points in three games (19 total). The other team scored 15 points total. How many MORE points did Emma's team score?`,
+     accept:["4"],
+     hint:["Emma's team total = 6 + 4 + 9 = 19","Find the difference: 19 − 15","19 − 15 = 4","Answer → 4"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.2.2", topic:"Central Idea & Details",
+     passage:`Sea turtles are amazing ocean animals. Every summer, mother sea turtles crawl onto Florida beaches at night to lay their eggs in the warm sand. About two months later, tiny baby turtles hatch and race to the ocean. Sadly, bright lights can confuse the babies, so many Florida beaches turn off their lights to help the turtles find their way.`,
+     questions:[
+       {id:"d5-r1-1", type:"mc", prompt:`What is the CENTRAL IDEA (main point) of this passage?`,
+        choices:["Florida has many beaches","Sea turtles and how people help them","Turtles are slow","Summer is warm"], answer:1,
+        hint:["The central idea is what the WHOLE passage is about","Most sentences talk about sea turtles","It's about sea turtles and helping them"]},
+       {id:"d5-r1-2", type:"text", prompt:`According to the passage, what do many Florida beaches turn OFF to help baby turtles? (one word)`,
+        accept:["lights","light","the lights"],
+        hint:["Find the sentence about helping the babies","Bright ___ can confuse them","Answer → lights"]},
+     ]},
+    {std:"ELA.3.R.2.2", topic:"Central Idea & Details",
+     passage:`Emma and Leilani love visiting the town library together almost every Saturday. They think it is one of the best places in town because it has thousands of free books to borrow. The library also offers story time for little kids and quiet tables where Emma and Leilani finish their homework. Best of all, the friendly librarians always help the two girls find exactly the books they are looking for.`,
+     questions:[
+       {id:"d5-r2-1", type:"mc", prompt:`What is the central idea of this passage?`,
+        choices:["Librarians are quiet","The library is a great place with many things to offer","Homework is hard","Books cost money"], answer:1,
+        hint:["What is the whole paragraph mostly about?","Every sentence tells something good about the library","It's about why the library is a great place"]},
+       {id:"d5-r2-2", type:"mc", prompt:`Which detail from the passage supports the central idea?`,
+        choices:["It has thousands of free books","The girls dislike reading","The town is very small","Books are heavy"], answer:0,
+        hint:["A detail is an example that backs up the main idea","Which choice is actually in the passage?","Free books is a reason the library is great"]},
+     ]},
+  ],
+};
+
+const DAY6 = {
+  math:[
+    {id:"d6-m1", type:"text", prompt:`Emma's rug is 5 feet long and 3 feet wide. What is the AREA of the rug in square feet? (Area = length × width)`,
+     accept:["15","15 square feet","15 sq ft"],
+     hint:["Area = length × width","5 × 3","5 × 3 = 15","Answer → 15 square feet"]},
+    {id:"d6-m2", type:"mc", prompt:`A rectangle is 8 units long and 4 units wide. What is its area?`,
+     choices:["12 square units","24 square units","32 square units","16 square units"], answer:2,
+     hint:["Area = length × width","8 × 4","8 × 4 = 32","Answer → 32 square units"]},
+    {id:"d6-m3", type:"text", prompt:`Emma's garden is 6 feet long and 7 feet wide. What is its area in square feet?`,
+     accept:["42","42 square feet","42 sq ft"],
+     hint:["Area = length × width","6 × 7","6 × 7 = 42","Answer → 42 square feet"]},
+    {id:"d6-m4", type:"text", prompt:`A rectangle has an area of 24 square feet. If its length is 6 feet, what is its WIDTH in feet?`,
+     accept:["4","4 feet","4 ft"],
+     hint:["Area = length × width, so width = area ÷ length","24 ÷ 6","24 ÷ 6 = 4","Answer → 4 feet"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.3.2", topic:"Summarizing a Text",
+     passage:`On Saturday, Emma decided to build a birdhouse. First, she gathered wood, nails, and paint. Next, her dad helped her hammer the pieces together. Then she painted it a bright, cheerful pink. Finally, she hung the birdhouse in the backyard tree, and by evening a little bird had already come to visit.`,
+     questions:[
+       {id:"d6-r1-1", type:"mc", prompt:`Which sentence is the BEST summary of the passage?`,
+        choices:["Emma likes the color pink","Emma built and hung a birdhouse, and a bird came to visit","Emma's dad has a hammer","Saturday was sunny"], answer:1,
+        hint:["A summary tells the MOST important idea in a short way","It should cover the whole story, not one tiny detail","She built a birdhouse and a bird visited"]},
+       {id:"d6-r1-2", type:"text", prompt:`What did Emma do FIRST? She g______ wood, nails, and paint. Type the missing word.`,
+        accept:["gathered","gather","got","collected"],
+        hint:["Look for the word 'First' in the passage","The next word tells what she did","Answer → gathered"]},
+     ]},
+    {std:"ELA.3.R.3.2", topic:"Summarizing a Text",
+     passage:`Honeybees are important helpers in nature. They fly from flower to flower collecting sweet nectar to make honey. As they travel, yellow pollen sticks to their fuzzy bodies and rubs onto the next flower. This spreading of pollen helps many plants grow the fruits and vegetables that people eat.`,
+     questions:[
+       {id:"d6-r2-1", type:"mc", prompt:`Which is the BEST summary of this passage?`,
+        choices:["Honeybees are yellow","Honeybees make honey and spread pollen that helps plants grow food","Flowers are pretty","Bees can fly"], answer:1,
+        hint:["A good summary covers the main points briefly","The passage is about what bees DO and why it matters","They make honey and help plants grow food"]},
+       {id:"d6-r2-2", type:"mc", prompt:`What sticks to a bee's fuzzy body and gets spread to other flowers?`,
+        choices:["Honey","Pollen","Water","Sugar"], answer:1,
+        hint:["Find the sentence about the bee's body","Yellow ___ sticks to them","Answer → pollen"]},
+     ]},
+  ],
+};
+
+const DAY7 = {
+  math:[
+    {id:"d7-m1", type:"text", standard:"MA.3.NSO.2.1", topic:"Adding & Subtracting Multi-Digit Numbers",
+     prompt:`Review — Add: 4,268 + 3,547 = ?`,
+     accept:["7815","7,815"],
+     hint:["8 + 7 = 15 → write 5, carry 1","6 + 4 + 1 = 11 → write 1, carry 1","2 + 5 + 1 = 8","4 + 3 = 7","Answer → 7,815"]},
+    {id:"d7-m2", type:"text", standard:"MA.3.NSO.2.4", topic:"Multiplication & Division Facts",
+     prompt:`Review — What is 8 × 7?`,
+     accept:["56"],
+     hint:["8 × 7 means 7 groups of 8","8 × 7 = 56","Answer → 56"]},
+    {id:"d7-m3", type:"mc", standard:"MA.3.FR.2.2", topic:"Equivalent Fractions",
+     prompt:`Review — Which fraction is equivalent to ${frac(1,2)}?`,
+     choices:[frac(3,6), frac(1,4), frac(2,5), frac(1,3)], answer:0,
+     hint:["Multiply top and bottom by 3","1×3 = 3 and 2×3 = 6",`Answer → ${frac(3,6)}`]},
+    {id:"d7-m4", type:"text", standard:"MA.3.GR.2.2", topic:"Area of Rectangles",
+     prompt:`Review — A rectangle is 9 feet long and 5 feet wide. What is its area in square feet?`,
+     accept:["45","45 square feet","45 sq ft"],
+     hint:["Area = length × width","9 × 5","9 × 5 = 45","Answer → 45 square feet"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.1.2", topic:"Finding the Theme",
+     passage:`Emma practiced the piano a little bit every single day, even when she wanted to play outside instead. Some days the songs were hard and her fingers felt clumsy. But she kept trying, week after week. At the spring recital, Emma played her song perfectly and beamed with pride.`,
+     questions:[
+       {id:"d7-r1-1", type:"mc", prompt:`Review — What is the THEME of this story?`,
+        choices:["Piano is boring","Practice and patience lead to success","Recitals are scary","Playing outside is best"], answer:1,
+        hint:["Theme = the big life lesson","Emma kept practicing and it paid off","Practice and patience lead to success"]},
+       {id:"d7-r1-2", type:"text", standard:"ELA.3.R.2.2", topic:"Central Idea & Details",
+        prompt:`Review — What instrument did Emma practice every day? (one word)`,
+        accept:["piano"],
+        hint:["Look at the first sentence","She practiced it every day","Answer → piano"]},
+     ]},
+    {std:"ELA.3.R.3.2", topic:"Summarizing a Text",
+     passage:`A tiny seed was planted in Emma's garden. With sunshine and water, a green sprout pushed up through the soil. Over many weeks the sprout grew into a tall plant with wide leaves. At last, bright red tomatoes appeared, ready for Emma to pick.`,
+     questions:[
+       {id:"d7-r2-1", type:"mc", prompt:`Review — Which is the BEST summary of the passage?`,
+        choices:["Emma likes red","A seed grew, with sun and water, into a plant that made tomatoes","Gardens need soil","Leaves are wide"], answer:1,
+        hint:["A summary is short but covers the whole story","It should describe the seed becoming a tomato plant","A seed grew into a plant that made tomatoes"]},
+       {id:"d7-r2-2", type:"mc", standard:"ELA.3.R.3.1", topic:"Figurative Language (Similes)",
+        prompt:`Review — Which sentence is a SIMILE?`,
+        choices:["The tomatoes were red","The plant grew tall","The ripe tomatoes were as red as fire trucks","Emma picked the tomatoes"], answer:2,
+        hint:["A simile uses 'like' or 'as'","Look for a comparison of two things","'as red as fire trucks' is the simile"]},
+     ]},
+  ],
+};
+
+const DAY8 = {
+  math:[
+    {id:"d8-m1", type:"mc", prompt:`Which statement is TRUE?`,
+     choices:["4,582 &gt; 4,528","4,582 &lt; 4,528","4,582 = 4,528"], answer:0,
+     hint:["Compare from the left","Thousands 4=4, hundreds 5=5","Tens: 8 vs 2 → 8 is bigger","So 4,582 &gt; 4,528"]},
+    {id:"d8-m2", type:"text", prompt:`Round 3,847 to the nearest HUNDRED.`,
+     accept:["3800","3,800"],
+     hint:["Look at the tens digit: 4","4 is less than 5 → round down","Hundreds stay 8, tens/ones become 0","Answer → 3,800"]},
+    {id:"d8-m3", type:"text", prompt:`Round 3,847 to the nearest THOUSAND.`,
+     accept:["4000","4,000"],
+     hint:["Look at the hundreds digit: 8","8 is 5 or more → round up","3 thousands becomes 4 thousands","Answer → 4,000"]},
+    {id:"d8-m4", type:"mc", prompt:`Emma has 2,109 stickers. Maya has 2,190. Who has MORE?`,
+     choices:["Emma","Maya","They have the same"], answer:1,
+     hint:["Thousands 2=2, hundreds 1=1","Compare tens: 0 vs 9","9 is bigger, so 2,190 &gt; 2,109","Maya has more"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.1.3", topic:"Character Perspectives",
+     passage:`At recess, Emma raced outside to play soccer the moment the bell rang. Her best friend Leilani, however, headed straight for the quiet reading corner with a stack of comic books. "Come play with us!" called Emma, who loved being active and a little loud. Leilani just smiled and said, "I'd rather relax and read — that's my kind of fun."`,
+     questions:[
+       {id:"d8-r1-1", type:"mc", prompt:`How does Emma like to spend recess?`,
+        choices:["Reading quietly","Playing active games outside","Sleeping","Doing homework"], answer:1,
+        hint:["Find what Emma does first","She 'raced outside to play soccer'","She likes active play"]},
+       {id:"d8-r1-2", type:"mc", prompt:`How is Leilani's perspective DIFFERENT from Emma's?`,
+        choices:["She also loves soccer","She prefers to relax and read","She wants to go home","She dislikes recess"], answer:1,
+        hint:["A perspective is how a character sees things","Leilani 'would rather relax and read'","Her view is different from Emma's"]},
+     ]},
+    {std:"ELA.3.R.1.3", topic:"Character Perspectives",
+     passage:`Emma and her little brother Sam watched the same movie about dragons. Emma thought it was thrilling and wished it were longer. Sam covered his eyes and said the dragons were too scary. Afterward, Emma wanted to watch it again, but Sam asked for a funny cartoon instead.`,
+     questions:[
+       {id:"d8-r2-1", type:"mc", prompt:`What was Emma's opinion of the movie?`,
+        choices:["It was too scary","It was thrilling and too short","It was boring","It was too funny"], answer:1,
+        hint:["Find Emma's words","She thought it was 'thrilling' and wished it longer","She loved it"]},
+       {id:"d8-r2-2", type:"text", prompt:`How did Sam feel about the dragons? He thought they were too s____. Type the word.`,
+        accept:["scary"],
+        hint:["Sam covered his eyes","He said the dragons were too ___","Answer → scary"]},
+     ]},
+  ],
+};
+
+const DAY9 = {
+  math:[
+    {id:"d9-m1", type:"text", prompt:`Find the missing number: 6 × ⬚ = 42`,
+     accept:["7"],
+     hint:["Ask: 6 times what equals 42?","6 × 7 = 42","The missing number is 7","Answer → 7"]},
+    {id:"d9-m2", type:"text", prompt:`Find the missing number: ⬚ ÷ 4 = 5`,
+     accept:["20"],
+     hint:["The number split into 4 groups gives 5 each","4 × 5 = 20","So the missing number is 20","Answer → 20"]},
+    {id:"d9-m3", type:"mc", prompt:`Find the missing number: 3 × ⬚ = 27`,
+     choices:["6","7","8","9"], answer:3,
+     hint:["3 times what equals 27?","3 × 9 = 27","The missing number is 9"]},
+    {id:"d9-m4", type:"text", prompt:`Find the missing number: 56 ÷ ⬚ = 8`,
+     accept:["7"],
+     hint:["56 split into equal groups of... gives 8","8 × 7 = 56","So 56 ÷ 7 = 8","Answer → 7"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.2.1", topic:"Text Features & Structure",
+     passage:`<strong>How to Plant a Sunflower</strong><br>First, dig a small hole in the soil. Next, drop one seed into the hole and cover it gently. Then, water the seed every day. Finally, place the pot in a sunny window and watch your sunflower grow!`,
+     questions:[
+       {id:"d9-r1-1", type:"mc", prompt:`What text STRUCTURE does this passage use?`,
+        choices:["Sequence (steps in order)","Cause and effect","Compare and contrast","Description only"], answer:0,
+        hint:["Look for order words: First, Next, Then, Finally","These signal steps in order","That is sequence structure"]},
+       {id:"d9-r1-2", type:"mc", prompt:`What TEXT FEATURE is the bold "How to Plant a Sunflower"?`,
+        choices:["A caption","A title (heading)","A glossary","A label"], answer:1,
+        hint:["It is at the top in bold","It tells what the text is about","That is a title or heading"]},
+     ]},
+    {std:"ELA.3.R.2.1", topic:"Text Features & Structure",
+     passage:`Emma learned why leaves change color. Because the days get shorter in fall, trees stop making green food. As a result, the green fades and yellow and orange colors appear. This is why Emma sees such bright leaves every autumn.`,
+     questions:[
+       {id:"d9-r2-1", type:"mc", prompt:`What text structure does this passage use?`,
+        choices:["Cause and effect","Steps in a recipe","A poem","A list of names"], answer:0,
+        hint:["Look for 'Because' and 'As a result'","These words show WHY something happens","That is cause and effect"]},
+       {id:"d9-r2-2", type:"text", prompt:`According to the text, leaves change because the days get s______ in fall. Type the word.`,
+        accept:["shorter","short"],
+        hint:["Find 'Because the days get...'","The days get ___ in fall","Answer → shorter"]},
+     ]},
+  ],
+};
+
+const DAY10 = {
+  math:[
+    {id:"d10-m1", type:"text", prompt:`Emma's class voted for favorite fruit: Apples 8, Bananas 5, Grapes 6. How many students voted in ALL?`,
+     accept:["19"],
+     hint:["Add all the votes","8 + 5 = 13","13 + 6 = 19","Answer → 19"]},
+    {id:"d10-m2", type:"mc", prompt:`Using the votes (Apples 8, Bananas 5, Grapes 6), which fruit got the MOST votes?`,
+     choices:["Apples","Bananas","Grapes","They tied"], answer:0,
+     hint:["Compare the numbers: 8, 5, 6","8 is the biggest","Apples got the most"]},
+    {id:"d10-m3", type:"text", prompt:`How many MORE students chose Apples (8) than Bananas (5)?`,
+     accept:["3"],
+     hint:["Subtract to compare","8 − 5 = 3","Answer → 3"]},
+    {id:"d10-m4", type:"mc", prompt:`On a pictograph, each ⭐ = 2 books. Emma read ⭐⭐⭐⭐. How many books did she read?`,
+     choices:["4","6","8","10"], answer:2,
+     hint:["Each star stands for 2 books","There are 4 stars","4 × 2 = 8","Answer → 8"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.2.3", topic:"Author's Purpose",
+     passage:`"Everyone should try growing a garden!" wrote Emma and Leilani in the class newsletter they edit together. The two friends explained that gardening is fun, teaches patience, and gives you fresh vegetables to eat. Emma and Leilani even promised it would make readers happier and healthier. They hoped their cheerful words would convince every classmate to start planting.`,
+     questions:[
+       {id:"d10-r1-1", type:"mc", prompt:`What is the authors' main PURPOSE?`,
+        choices:["To persuade readers to garden","To tell a scary story","To explain how a car works","To make readers laugh"], answer:0,
+        hint:["They want to 'convince' their classmates","Convincing = persuading","Their purpose is to persuade"]},
+       {id:"d10-r1-2", type:"text", prompt:`Authors write to persuade, inform, or entertain. The girls' purpose here is to p______. Type the word.`,
+        accept:["persuade","persuade readers","convince","perswade","persaude","pursuade","persuede"],
+        hint:["They are trying to convince readers","The word starts with 'p'","Answer → persuade"]},
+     ]},
+    {std:"ELA.3.R.2.3", topic:"Author's Purpose",
+     passage:`Emma read a book that explained how bees make honey. It gave facts about hives, nectar, and worker bees. There were diagrams and true details on every page. The author wanted readers to learn real information about bees.`,
+     questions:[
+       {id:"d10-r2-1", type:"mc", prompt:`What is the author's purpose in this book?`,
+        choices:["To entertain with a fairy tale","To inform readers with facts","To sell honey","To persuade people to fear bees"], answer:1,
+        hint:["The book gives 'facts' and 'true details'","Giving facts = informing","The purpose is to inform"]},
+       {id:"d10-r2-2", type:"mc", prompt:`Which clue tells you the author wants to INFORM?`,
+        choices:["It has jokes","It gives facts and diagrams","It rhymes","It has talking animals"], answer:1,
+        hint:["Informational writing uses facts","This book has facts and diagrams","That shows it informs"]},
+     ]},
+  ],
+};
+
+const DAY11 = {
+  math:[
+    {id:"d11-m1", type:"mc", prompt:`Which fraction is GREATER: ${frac(3,4)} or ${frac(1,4)}?`,
+     choices:[frac(3,4), frac(1,4), "They are equal"], answer:0,
+     hint:["Same bottom number (denominator)","Compare the tops: 3 vs 1","3 is bigger, so "+frac(3,4)+" is greater"]},
+    {id:"d11-m2", type:"mc", prompt:`Which fraction is GREATER: ${frac(1,3)} or ${frac(1,6)}?`,
+     choices:[frac(1,3), frac(1,6), "They are equal"], answer:0,
+     hint:["Same top number (numerator)","Fewer, bigger pieces vs more, smaller pieces","Thirds are bigger than sixths","So "+frac(1,3)+" is greater"]},
+    {id:"d11-m3", type:"text", prompt:`Compare with &lt; or &gt;: ${frac(2,5)} ⬚ ${frac(4,5)}. Type &lt; or &gt;.`,
+     accept:["<","&lt;"],
+     hint:["Same denominator (5)","Compare tops: 2 vs 4","2 is less than 4","Answer → &lt;"]},
+    {id:"d11-m4", type:"mc", prompt:`Emma ate ${frac(2,8)} of a pizza and Maya ate ${frac(5,8)}. Who ate MORE?`,
+     choices:["Emma","Maya","They ate the same"], answer:1,
+     hint:["Same denominator (8)","Compare tops: 2 vs 5","5 is bigger, so Maya ate more"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.2.4", topic:"Author's Claim & Evidence",
+     passage:`Emma wrote: "Our school should have longer recess." She gave reasons: kids focus better after moving their bodies, and playing helps friends get along. She added that doctors say exercise is healthy. Emma believed these reasons proved her point.`,
+     questions:[
+       {id:"d11-r1-1", type:"mc", prompt:`What is Emma's CLAIM (main opinion)?`,
+        choices:["School lunch should change","Our school should have longer recess","Homework is too hard","Recess is boring"], answer:1,
+        hint:["A claim is the author's main opinion","She states it in the first sentence","Longer recess is her claim"]},
+       {id:"d11-r1-2", type:"mc", prompt:`Which is a piece of EVIDENCE Emma uses?`,
+        choices:["Doctors say exercise is healthy","Recess is at noon","She likes pizza","The sky is blue"], answer:0,
+        hint:["Evidence is a reason that supports the claim","She mentions what doctors say","That is her evidence"]},
+     ]},
+    {std:"ELA.3.R.2.4", topic:"Author's Claim & Evidence",
+     passage:`In her report, Emma claimed that reading before bed is a great habit. She explained that it calms the mind and helps you sleep. She also wrote that reading builds a bigger vocabulary. Each reason supported her big idea.`,
+     questions:[
+       {id:"d11-r2-1", type:"text", prompt:`Emma's claim is that reading before b__ is a great habit. Type the word.`,
+        accept:["bed","bedtime"],
+        hint:["Read the first sentence","Reading before ___ is a great habit","Answer → bed"]},
+       {id:"d11-r2-2", type:"mc", prompt:`Which reason does Emma give to support her claim?`,
+        choices:["Reading builds a bigger vocabulary","Reading is expensive","Books are heavy","Reading wastes time"], answer:0,
+        hint:["Find a reason that helps her point","She says reading builds vocabulary","That reason supports her claim"]},
+     ]},
+  ],
+};
+
+const DAY12 = {
+  math:[
+    {id:"d12-m1", type:"text", prompt:`Recess starts at 10:20 and lasts 15 minutes. What time does it END? (type like 10:35)`,
+     accept:["10:35"],
+     hint:["Start at 10:20","Add 15 minutes","20 + 15 = 35 minutes","Answer → 10:35"]},
+    {id:"d12-m2", type:"text", prompt:`Emma starts homework at 4:00 pm and finishes at 4:45 pm. How many MINUTES did it take?`,
+     accept:["45","45 minutes","45 min"],
+     hint:["From 4:00 to 4:45","45 − 0 = 45","Answer → 45 minutes"]},
+    {id:"d12-m3", type:"mc", prompt:`A movie starts at 2:00 and ends at 3:30. How LONG is the movie?`,
+     choices:["30 minutes","1 hour","1 hour 30 minutes","2 hours"], answer:2,
+     hint:["2:00 to 3:00 is 1 hour","3:00 to 3:30 is 30 more minutes","Total = 1 hour 30 minutes"]},
+    {id:"d12-m4", type:"text", prompt:`It is 7:50. What time will it be in 20 minutes? (type like 8:10)`,
+     accept:["8:10"],
+     hint:["From 7:50, add 10 minutes → 8:00","Then add 10 more → 8:10","Answer → 8:10"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.3.3", topic:"Comparing Two Texts",
+     passage:`<em>Text A:</em> Emma wrote that the beach is the best place because you can swim and build sandcastles.<br><em>Text B:</em> Her friend Leo wrote that the beach is too hot and sandy, and he prefers the cool forest.`,
+     questions:[
+       {id:"d12-r1-1", type:"mc", prompt:`How are the two texts DIFFERENT?`,
+        choices:["Emma loves the beach; Leo prefers the forest","Both hate the beach","Both love the forest","They agree on everything"], answer:0,
+        hint:["Text A likes the beach, Text B does not","They have different opinions","Emma loves the beach; Leo prefers the forest"]},
+       {id:"d12-r1-2", type:"text", prompt:`What place do BOTH texts talk about? The b____. Type the word.`,
+        accept:["beach"],
+        hint:["Both writers mention the same place","It has sand and water","Answer → beach"]},
+     ]},
+    {std:"ELA.3.R.3.3", topic:"Comparing Two Texts",
+     passage:`<em>Emma's essay</em> argues that dogs make the best pets because they are loyal, playful, and always happy to see you.<br><em>Leilani's essay</em> argues that cats make the best pets because they are quiet, clean, and independent. Interestingly, both girls agree on one thing: a good pet brings its owner great joy.`,
+     questions:[
+       {id:"d12-r2-1", type:"mc", prompt:`What do BOTH Emma and Leilani AGREE on?`,
+        choices:["Dogs are loud","A good pet brings its owner great joy","Cats are messy","Pets are hard work"], answer:1,
+        hint:["Look at the last sentence","Both girls 'agree' a pet brings joy","That is the shared idea"]},
+       {id:"d12-r2-2", type:"mc", prompt:`Which pet does Leilani's essay say is best?`,
+        choices:["Dogs","Cats","Fish","Birds"], answer:1,
+        hint:["Leilani praises the quiet, clean, independent pet","That is the cat","Answer → cats"]},
+     ]},
+  ],
+};
+
+const DAY13 = {
+  math:[
+    {id:"d13-m1", type:"mc", prompt:`How many SIDES does a quadrilateral have?`,
+     choices:["3","4","5","6"], answer:1,
+     hint:["'Quad' means four","A quadrilateral has 4 sides","Answer → 4"]},
+    {id:"d13-m2", type:"mc", prompt:`Which shape has 4 EQUAL sides and 4 RIGHT angles?`,
+     choices:["Square","Triangle","Circle","Pentagon"], answer:0,
+     hint:["4 equal sides and 4 square corners","That describes a square","Answer → Square"]},
+    {id:"d13-m3", type:"text", prompt:`A rectangle is 6 cm long and 4 cm wide. What is its PERIMETER? (add all 4 sides)`,
+     accept:["20","20 cm"],
+     hint:["Perimeter = add all sides","6 + 4 + 6 + 4","= 20","Answer → 20 cm"]},
+    {id:"d13-m4", type:"mc", prompt:`Which shape is NOT a quadrilateral?`,
+     choices:["Trapezoid","Rhombus","Triangle","Rectangle"], answer:2,
+     hint:["Quadrilaterals have 4 sides","A triangle has only 3 sides","Triangle is not a quadrilateral"]},
+  ],
+  reading:[
+    {std:"ELA.3.V.1.3", topic:"Using Context Clues",
+     passage:`The path was so <em>narrow</em> that Emma could barely squeeze through. There was only enough room for one person to walk at a time. She had to turn sideways to fit between the two walls.`,
+     questions:[
+       {id:"d13-r1-1", type:"mc", prompt:`What does the word "narrow" mean here?`,
+        choices:["Very wide","Very thin or tight","Very tall","Very bright"], answer:1,
+        hint:["Emma could 'barely squeeze through'","Only room for one person","Narrow means thin or tight"]},
+       {id:"d13-r1-2", type:"text", prompt:`Which clue word shows the path was tight? "barely s______ through." Type the word.`,
+        accept:["squeeze","squeze","sqeeze","squeaze","squeez"],
+        hint:["Find the phrase 'barely ___ through'","It means to fit into a tight space","Answer → squeeze"]},
+     ]},
+    {std:"ELA.3.V.1.3", topic:"Using Context Clues",
+     passage:`Emma felt <em>famished</em> after the long hike. Her stomach growled loudly, and she could not wait to eat a big lunch. She had not had a single snack all morning.`,
+     questions:[
+       {id:"d13-r2-1", type:"mc", prompt:`What does "famished" mean?`,
+        choices:["Very sleepy","Very hungry","Very cold","Very happy"], answer:1,
+        hint:["Her stomach 'growled loudly'","She had not eaten all morning","Famished means very hungry"]},
+       {id:"d13-r2-2", type:"mc", prompt:`Which context clue helped you the most?`,
+        choices:["The long hike","Her stomach growled and she hadn't eaten","The weather","Her shoes"], answer:1,
+        hint:["Clues tell you the word's meaning","A growling stomach means hunger","That clue points to 'very hungry'"]},
+     ]},
+  ],
+};
+
+const DAY14 = {
+  math:[
+    {id:"d14-m1", type:"text", standard:"MA.3.NSO.1.3", topic:"Comparing & Rounding Whole Numbers",
+     prompt:`Review — Round 6,271 to the nearest hundred.`,
+     accept:["6300","6,300"],
+     hint:["Look at the tens digit: 7","7 is 5 or more → round up","Answer → 6,300"]},
+    {id:"d14-m2", type:"text", standard:"MA.3.AR.2.3", topic:"Finding the Unknown Number",
+     prompt:`Review — Find the missing number: 8 × ⬚ = 48`,
+     accept:["6"],
+     hint:["8 times what is 48?","8 × 6 = 48","Answer → 6"]},
+    {id:"d14-m3", type:"mc", standard:"MA.3.AR.3.1", topic:"Even & Odd Numbers",
+     prompt:`Review — Which number is EVEN?`,
+     choices:["7","13","24","31"], answer:2,
+     hint:["Even numbers end in 0, 2, 4, 6, or 8","24 ends in 4","24 is even"]},
+    {id:"d14-m4", type:"text", standard:"MA.3.GR.1.2", topic:"2-D Figures & Perimeter",
+     prompt:`Review — A square has sides of 5 cm. What is its perimeter?`,
+     accept:["20","20 cm"],
+     hint:["A square has 4 equal sides","5 + 5 + 5 + 5","= 20","Answer → 20 cm"]},
+  ],
+  reading:[
+    {std:"ELA.3.R.2.3", topic:"Author's Purpose",
+     passage:`Emma wrote a silly poem full of jokes about a dancing pickle. Everyone in class giggled as she read it aloud. She only wanted to make her friends laugh.`,
+     questions:[
+       {id:"d14-r1-1", type:"mc", prompt:`Review — What is the author's purpose?`,
+        choices:["To inform with facts","To entertain and make readers laugh","To persuade","To give directions"], answer:1,
+        hint:["The poem is full of jokes","Everyone giggled","The purpose is to entertain"]},
+       {id:"d14-r1-2", type:"text", standard:"ELA.3.V.1.3", topic:"Using Context Clues",
+        prompt:`Review — "Emma was <em>thrilled</em> — she jumped and cheered with joy." Thrilled means very h____. Type the word.`,
+        accept:["happy","excited"],
+        hint:["She jumped and cheered with joy","Thrilled means very ___","Answer → happy"]},
+     ]},
+    {std:"ELA.3.R.1.3", topic:"Character Perspectives",
+     passage:`Emma loved the rainy day and splashed in every puddle. Her friend Mia frowned and said the rain ruined her plans to play outside. The two friends saw the same weather in very different ways.`,
+     questions:[
+       {id:"d14-r2-1", type:"mc", prompt:`Review — How does Emma feel about the rain?`,
+        choices:["She loves it","She hates it","She is scared of it","She doesn't notice it"], answer:0,
+        hint:["She 'splashed in every puddle'","She enjoys the rain","She loves it"]},
+       {id:"d14-r2-2", type:"mc", standard:"ELA.3.R.3.3", topic:"Comparing Two Texts",
+        prompt:`Review — How are Emma's and Mia's perspectives DIFFERENT?`,
+        choices:["Both love rain","Emma loves rain; Mia dislikes it","Both dislike rain","They feel the same"], answer:1,
+        hint:["Emma splashes happily; Mia frowns","They see the rain differently","Emma loves it; Mia dislikes it"]},
+     ]},
+  ],
+};
+
+const DAY15 = {
+  math:[
+    {id:"d15-m1", type:"mc", prompt:`In the number 384,127, what is the VALUE of the digit 8?`,
+     choices:["800","8,000","80,000","800,000"], answer:2,
+     hint:["Find the 8 — it is in the ten-thousands place","Ten-thousands means 8 × 10,000","8 × 10,000 = 80,000"]},
+    {id:"d15-m2", type:"text", prompt:`What is the VALUE of the digit 3 in 356,000?`,
+     accept:["300000","300,000"],
+     hint:["The 3 sits in the hundred-thousands place","3 × 100,000","Answer → 300,000"]},
+    {id:"d15-m3", type:"mc", prompt:`Which number is <em>three hundred forty thousand, two hundred five</em>?`,
+     choices:["34,205","340,205","340,250","304,205"], answer:1,
+     hint:["340 thousand → 340,000","two hundred five → 205","Put together → 340,205"]},
+    {id:"d15-m4", type:"text", prompt:`Which digit is in the TEN-THOUSANDS place in 725,418?`,
+     accept:["2"],
+     hint:["Count places from the right: ones, tens, hundreds, thousands, ten-thousands","The ten-thousands digit is 2","Answer → 2"]},
+  ],
+  reading:[
+    {std:"ELA.4.R.1.1", topic:"Analyzing Plot & Character",
+     passage:`When the county fair announced its first-ever robotics contest, Emma and Leilani signed up as a team, even though neither of them had ever built a machine before. For three long weeks the two friends sketched designs, borrowed tools, and rebuilt their wobbly robot again and again. The afternoon before the contest, its metal arm snapped clean off, and Emma nearly abandoned the whole project in frustration. Leilani, however, took a slow breath, studied the broken joint, and reinforced it with a strip of aluminum. When their little robot finally rolled across the finish line the next day, the crowd erupted — and both girls understood that stubborn patience had made all the difference.`,
+     questions:[
+       {id:"d15-r1-1", type:"mc", prompt:`What major problem do Emma and Leilani face the day before the contest?`,
+        choices:["They forget to sign up","Their robot's arm snaps off","They lose their tools","The contest is cancelled"], answer:1,
+        hint:["Look near the middle of the passage","'its metal arm snapped clean off'","That is the problem they must solve"]},
+       {id:"d15-r1-2", type:"mc", prompt:`Which word BEST describes how the girls respond to the setback?`,
+        choices:["Careless","Determined","Fearful","Bored"], answer:1,
+        hint:["Notice what Leilani does after the arm breaks","She breathes, studies the problem, and repairs it","That shows determination"]},
+     ]},
+    {std:"ELA.4.R.1.1", topic:"Analyzing Plot & Character",
+     passage:`Marcus had always been the fastest runner in fourth grade, so he expected to win the school race without much effort. When a new student named Priya edged past him at the finish line, a hot flash of jealousy washed over him. For several days Marcus avoided her, replaying the loss in his mind. Then one rainy morning he spotted Priya practicing alone on the empty track, her sneakers soaked through. Slowly, Marcus realized that her victory came from hard work rather than luck, and he gathered the courage to ask if they could train together.`,
+     questions:[
+       {id:"d15-r2-1", type:"mc", prompt:`Why does Marcus avoid Priya at first?`,
+        choices:["He is jealous that she beat him","He does not know her name","She is unkind to him","She runs too slowly"], answer:0,
+        hint:["Notice his feelings after the race","'a hot flash of jealousy washed over him'","Jealousy is why he avoids her"]},
+       {id:"d15-r2-2", type:"mc", prompt:`What causes Marcus to CHANGE his attitude?`,
+        choices:["He wins the next race","He sees Priya practicing hard in the rain","His coach scolds him","He forgets about the loss"], answer:1,
+        hint:["Something he sees changes his mind","He watches her train alone in the rain","He realizes she earned her win"]},
+     ]},
+  ],
+};
+
+const DAY16 = {
+  math:[
+    {id:"d16-m1", type:"mc", prompt:`Which statement is TRUE?`,
+     choices:["45,678 &gt; 45,876","45,678 &lt; 45,876","45,678 = 45,876"], answer:1,
+     hint:["Ten-thousands and thousands match (45,_)","Compare hundreds: 6 vs 8","6 is smaller, so 45,678 &lt; 45,876"]},
+    {id:"d16-m2", type:"text", prompt:`Round 47,382 to the nearest THOUSAND.`,
+     accept:["47000","47,000"],
+     hint:["Look at the hundreds digit: 3","3 is less than 5 → round down","Answer → 47,000"]},
+    {id:"d16-m3", type:"text", prompt:`Round 152,640 to the nearest HUNDRED-THOUSAND.`,
+     accept:["200000","200,000"],
+     hint:["Look at the ten-thousands digit: 5","5 or more → round up","1 hundred-thousand becomes 2","Answer → 200,000"]},
+    {id:"d16-m4", type:"mc", prompt:`Which number is the SMALLEST?`,
+     choices:["3,209","3,290","3,029"], answer:2,
+     hint:["Thousands all equal 3","Compare hundreds: 2, 2, 0","0 is smallest → 3,029"]},
+  ],
+  reading:[
+    {std:"ELA.4.R.1.2", topic:"Theme Development",
+     passage:`Every summer, Emma's grandmother tended a small vegetable garden that never seemed to produce much of anything. One year Emma and her best friend Leilani offered to help, expecting baskets of vegetables within days, but week after week only a few pale tomatoes appeared. Grandmother simply smiled, watered the rows, and reminded the girls that good things take time. By the final weeks of August, the garden had transformed, overflowing with peppers, beans, and heavy green squash. Emma and Leilani finally understood that it was patience, not speed, that had grown their feast.`,
+     questions:[
+       {id:"d16-r1-1", type:"mc", prompt:`What is the THEME (message) of this passage?`,
+        choices:["Gardening is a waste of time","Good things are worth waiting for","Grandmothers dislike vegetables","Summers are too short"], answer:1,
+        hint:["Think about the lesson the girls learn","'patience, not speed, had grown their feast'","Good things take time"]},
+       {id:"d16-r1-2", type:"mc", prompt:`Which detail helps DEVELOP that theme?`,
+        choices:["The garden was near a fence","Week after week only a few tomatoes appeared, then it overflowed later","The girls wore boots","Grandmother owned a hose"], answer:1,
+        hint:["A theme grows from key details","Slow start, then a huge harvest","That contrast shows patience pays off"]},
+     ]},
+    {std:"ELA.4.R.1.2", topic:"Theme Development",
+     passage:`Diego dreaded the class talent show, certain that his only ability — drawing quietly in his sketchbook — was nothing worth showing. All around him, classmates rehearsed songs, magic tricks, and cartwheels while Diego sank lower into his seat. At the last moment, his teacher quietly scanned Diego's sketchbook and displayed his detailed drawings on the classroom projector. The room filled with astonished gasps and applause. Diego learned that a talent does not have to be loud to be worth sharing.`,
+     questions:[
+       {id:"d16-r2-1", type:"mc", prompt:`What theme does Diego's story teach?`,
+        choices:["Only loud talents matter","Every kind of talent has value","Drawing is better than singing","Talent shows are unfair"], answer:1,
+        hint:["What does Diego realize at the end?","A quiet talent still amazed the class","All talents have value"]},
+       {id:"d16-r2-2", type:"mc", prompt:`How does Diego feel at the START of the passage?`,
+        choices:["Confident and proud","Doubtful about his talent","Excited to perform","Angry at his classmates"], answer:1,
+        hint:["He 'dreaded' the show and 'sank lower'","He doubts his drawing is worth showing","He feels doubtful"]},
+     ]},
+  ],
+};
+
+const DAY17 = {
+  math:[
+    {id:"d17-m1", type:"text", prompt:`Multiply: 34 × 6 = ?`,
+     accept:["204"],
+     hint:["6 × 4 = 24 → write 4, carry 2","6 × 3 = 18, plus 2 = 20","Answer → 204"]},
+    {id:"d17-m2", type:"text", prompt:`Multiply: 123 × 4 = ?`,
+     accept:["492"],
+     hint:["4 × 3 = 12 → write 2, carry 1","4 × 2 = 8, plus 1 = 9","4 × 1 = 4","Answer → 492"]},
+    {id:"d17-m3", type:"mc", prompt:`Multiply: 25 × 12 = ?`,
+     choices:["250","275","300","325"], answer:2,
+     hint:["25 × 10 = 250","25 × 2 = 50","250 + 50 = 300"]},
+    {id:"d17-m4", type:"text", prompt:`Emma reads 45 pages every day for 7 days. How many pages in all?`,
+     accept:["315"],
+     hint:["45 × 7","7 × 5 = 35 → write 5, carry 3","7 × 4 = 28, plus 3 = 31","Answer → 315"]},
+  ],
+  reading:[
+    {std:"ELA.4.R.2.1", topic:"Text Features & Structure",
+     passage:`Sea turtles that hatch on Florida's beaches face a surprising danger: the bright lights of nearby streets and hotels. Newly hatched turtles instinctively crawl toward the brightest horizon, which for millions of years was the moonlit ocean. Today, however, glowing city lights often lure the tiny hatchlings in the wrong direction, toward busy roads. Scientists studied this problem and proposed a clever solution. Many coastal towns now install special amber lights that turtles barely notice, and trained volunteers guide lost hatchlings safely back to the sea.`,
+     questions:[
+       {id:"d17-r1-1", type:"mc", prompt:`What text STRUCTURE organizes this passage?`,
+        choices:["Problem and solution","Compare and contrast","A poem with rhyme","A list of names"], answer:0,
+        hint:["The passage names a danger, then how people fix it","A danger fixed by a solution","That is problem and solution"]},
+       {id:"d17-r1-2", type:"mc", prompt:`What SOLUTION do coastal towns use?`,
+        choices:["They close the beaches","They install amber lights turtles barely notice","They remove all turtles","They build higher hotels"], answer:1,
+        hint:["Find the solution near the end","Special amber lights plus volunteers","Amber lights are the fix"]},
+     ]},
+    {std:"ELA.4.R.2.1", topic:"Text Features & Structure",
+     passage:`Deep beneath the Earth's surface, melted rock called magma slowly collects in enormous underground chambers. As more magma rises, tremendous pressure builds and pushes toward any weak crack in the crust. Eventually the pressure becomes too great, and the magma bursts upward through an opening called a vent. Once this fiery rock reaches the surface, its name changes to lava. Layer by layer, cooling lava hardens into the towering mountain we call a volcano.`,
+     questions:[
+       {id:"d17-r2-1", type:"mc", prompt:`What text structure does this passage use?`,
+        choices:["Sequence (a step-by-step process)","Question and answer","Opinion and reasons","Cause with no effect"], answer:0,
+        hint:["It explains how a volcano forms, step by step","Watch the order of events","That is sequence"]},
+       {id:"d17-r2-2", type:"mc", prompt:`What is magma called once it reaches the surface?`,
+        choices:["Crust","Lava","Vent","Ash"], answer:1,
+        hint:["Find the sentence about reaching the surface","'its name changes to lava'","Answer → lava"]},
+     ]},
+  ],
+};
+
+const DAY18 = {
+  math:[
+    {id:"d18-m1", type:"text", prompt:`When you divide 47 ÷ 5, what is the REMAINDER (the amount left over)?`,
+     accept:["2"],
+     hint:["How many 5s fit in 47? Nine (5 × 9 = 45)","47 − 45 = 2","The remainder is 2"]},
+    {id:"d18-m2", type:"text", prompt:`Divide: 96 ÷ 4 = ?`,
+     accept:["24"],
+     hint:["Think 4 × ? = 96","4 × 24 = 96","Answer → 24"]},
+    {id:"d18-m3", type:"mc", prompt:`Emma has 38 cookies to share equally among 4 friends. How many does each friend get, and how many are left over?`,
+     choices:["9 with 2 left over","8 with 6 left over","9 with 0 left over","10 with 2 left over"], answer:0,
+     hint:["4 × 9 = 36, which fits in 38","38 − 36 = 2 left over","Each gets 9, with 2 left over"]},
+    {id:"d18-m4", type:"text", prompt:`Divide: 85 ÷ 7. What is the WHOLE-NUMBER part of the answer (ignore the remainder)?`,
+     accept:["12"],
+     hint:["7 × 12 = 84, which fits in 85","So the whole-number part is 12","(1 is left over)"]},
+  ],
+  reading:[
+    {std:"ELA.4.R.2.2", topic:"Central Idea & Details",
+     passage:`Honeybees are far more important to our dinner tables than most people realize. As a bee travels from blossom to blossom gathering sweet nectar, grains of dusty pollen cling to its fuzzy body and rub onto the next flower. This process, called pollination, is exactly what many plants need in order to grow fruit. Without busy bees, favorite foods such as apples, almonds, and blueberries would become rare and expensive. Scientists warn that protecting bees is really about protecting the food supply for everyone.`,
+     questions:[
+       {id:"d18-r1-1", type:"mc", prompt:`What is the CENTRAL IDEA of this passage?`,
+        choices:["Bees are annoying insects","Bees are essential to the food we eat","Apples grow on tall trees","Pollen is yellow"], answer:1,
+        hint:["What is the whole passage mostly about?","Every detail connects bees to our food","Bees are essential to our food supply"]},
+       {id:"d18-r1-2", type:"mc", prompt:`Which detail best SUPPORTS that central idea?`,
+        choices:["Pollen is dusty","Without bees, apples and almonds would become rare","Bees have fuzzy bodies","Nectar is sweet"], answer:1,
+        hint:["Find the detail that shows bees matter to food","Losing bees would hurt our crops","That supports the central idea"]},
+     ]},
+    {std:"ELA.4.R.2.2", topic:"Central Idea & Details",
+     passage:`The ancient city of Pompeii offers a rare window into everyday Roman life. When a nearby volcano erupted in the year 79, thick ash buried the entire city within hours, sealing it away for centuries. Because the ash settled so quickly, homes, shops, painted walls, and even loaves of bread were preserved almost perfectly. When archaeologists later uncovered the streets, they found daily life frozen in a single moment of time. In many ways, Pompeii teaches us more about ordinary Romans than any book ever could.`,
+     questions:[
+       {id:"d18-r2-1", type:"mc", prompt:`What is the central idea of this passage?`,
+        choices:["Volcanoes are dangerous","Pompeii reveals what daily Roman life was like","Bread does not last long","Ash is gray and heavy"], answer:1,
+        hint:["What does the whole passage explain?","It focuses on what Pompeii shows us","Pompeii reveals daily Roman life"]},
+       {id:"d18-r2-2", type:"mc", prompt:`Which detail supports the central idea?`,
+        choices:["Ash preserved homes, shops, and even bread","The volcano was tall","Romans spoke Latin","The year was 79"], answer:0,
+        hint:["Which detail shows we can see daily life?","Preserved homes and bread reveal how people lived","That supports the idea"]},
+     ]},
+  ],
+};
+
+const DAY19 = {
+  math:[
+    {id:"d19-m1", type:"mc", prompt:`Which statement is TRUE?`,
+     choices:["0.7 &gt; 0.65","0.7 &lt; 0.65","0.7 = 0.65"], answer:0,
+     hint:["Line up the decimals: 0.70 and 0.65","Compare tenths: 7 vs 6","7 is bigger, so 0.7 &gt; 0.65"]},
+    {id:"d19-m2", type:"text", prompt:`Compare with &lt; or &gt;: 0.45 ⬚ 0.54. Type &lt; or &gt;.`,
+     accept:["<","&lt;"],
+     hint:["Compare the tenths first: 4 vs 5","4 is less than 5","So 0.45 &lt; 0.54 → answer &lt;"]},
+    {id:"d19-m3", type:"text", prompt:`Which decimal is the SMALLEST: 0.9, 0.19, or 0.91? (type it)`,
+     accept:["0.19",".19"],
+     hint:["Compare the tenths place","0.19 has 1 tenth; the others have 9 tenths","0.19 is smallest"]},
+    {id:"d19-m4", type:"mc", prompt:`Emma ran 0.5 km and Maya ran 0.45 km. Who ran FARTHER?`,
+     choices:["Emma","Maya","They tied"], answer:0,
+     hint:["Think of 0.5 as 0.50","Compare 0.50 and 0.45","0.50 is greater, so Emma ran farther"]},
+  ],
+  reading:[
+    {std:"ELA.4.R.2.3", topic:"Author's Perspective",
+     passage:`In my opinion, our town should build a new public library instead of paving another parking lot. A library would give students a calm, welcoming place to study and free access to thousands of books they could never afford to buy. A parking lot, by contrast, sits half-empty most of the day and offers nothing to our community's future. Some people argue that parking is more practical, but I believe practicality should not always win. A town that invests in reading is really investing in its own children.`,
+     questions:[
+       {id:"d19-r1-1", type:"mc", prompt:`What is the author's PERSPECTIVE (point of view)?`,
+        choices:["The town needs more parking","The town should build a library instead of a parking lot","Libraries are old-fashioned","Books are too expensive to buy"], answer:1,
+        hint:["What does the author argue for?","The very first sentence states the opinion","Build a library, not a parking lot"]},
+       {id:"d19-r1-2", type:"mc", prompt:`Which reason does the author give to support this view?`,
+        choices:["Parking lots are colorful","A library gives free access to thousands of books","Cars are noisy","Reading is boring"], answer:1,
+        hint:["Find a reason that backs the opinion","Free books support the library idea","That is the author's reason"]},
+     ]},
+    {std:"ELA.4.R.2.3", topic:"Author's Perspective",
+     passage:`As a lifelong bird-watcher, I find it troubling that so many people walk right past the sparrows and finches all around them. These small, ordinary birds quietly control insects, scatter seeds that grow into new plants, and fill our mornings with cheerful song. Yet most people never pause to notice them at all. I am convinced that paying attention to everyday wildlife makes us calmer, kinder, and more curious. Everyone would benefit from simply looking up now and then.`,
+     questions:[
+       {id:"d19-r2-1", type:"mc", prompt:`How does the author FEEL about people ignoring small birds?`,
+        choices:["Pleased","Troubled and concerned","Confused","Amused"], answer:1,
+        hint:["Notice the word 'troubling' in the first sentence","The author wishes people would notice birds","The author feels troubled"]},
+       {id:"d19-r2-2", type:"mc", prompt:`What is the author's overall perspective?`,
+        choices:["Ordinary birds deserve our attention","Birds are pests","Bird-watching is a waste of time","Only rare birds matter"], answer:0,
+        hint:["What big idea does the author push?","Everyday birds are worth noticing","Ordinary birds deserve attention"]},
+     ]},
+  ],
+};
+
+const DAY20 = {
+  math:[
+    {id:"d20-m1", type:"text", prompt:`Add: 0.4 + 0.5 = ?`,
+     accept:["0.9",".9"],
+     hint:["Add the tenths: 4 + 5 = 9","That is 9 tenths","Answer → 0.9"]},
+    {id:"d20-m2", type:"text", prompt:`Add: 0.75 + 0.20 = ?`,
+     accept:["0.95",".95"],
+     hint:["Line up the decimal points","5+0=5 hundredths, 7+2=9 tenths","Answer → 0.95"]},
+    {id:"d20-m3", type:"text", prompt:`Subtract: 1.50 − 0.25 = ?`,
+     accept:["1.25"],
+     hint:["Line up the decimal points","50 hundredths − 25 hundredths = 25","Answer → 1.25"]},
+    {id:"d20-m4", type:"mc", prompt:`Emma has $2.50 and spends $1.75 on a book. How much money is LEFT?`,
+     choices:["$0.75","$0.85","$1.25","$1.75"], answer:0,
+     hint:["$2.50 − $1.75","Line up the decimals and subtract","Answer → $0.75"]},
+  ],
+  reading:[
+    {std:"ELA.4.V.1.2", topic:"Greek & Latin Roots",
+     passage:`Emma's teacher explained that thousands of English words are built from ancient pieces called roots. One of the most useful is the Latin root <em>port</em>, which means "to carry." Once you know this, whole families of words suddenly make sense: to <em>transport</em> something is to carry it across a distance, a <em>portable</em> speaker is one you can easily carry, and to <em>import</em> goods is to carry them into a country. Emma grinned, realizing that a single root could unlock the meaning of dozens of unfamiliar words.`,
+     questions:[
+       {id:"d20-r1-1", type:"mc", prompt:`What does the root "port" mean?`,
+        choices:["To break","To carry","To see","To build"], answer:1,
+        hint:["Reread the second sentence","The root 'port' means...","To carry"]},
+       {id:"d20-r1-2", type:"mc", prompt:`Using the root, a "portable" speaker is one that ___.`,
+        choices:["is very loud","can be carried easily","plays only old songs","is broken"], answer:1,
+        hint:["'port' means to carry","Portable = able to be carried","Answer → can be carried easily"]},
+     ]},
+    {std:"ELA.4.V.1.2", topic:"Greek & Latin Roots",
+     passage:`Another powerful root is <em>spect</em>, which comes from Latin and means "to look." It hides inside many familiar words: when you <em>inspect</em> something you look at it closely, a <em>spectator</em> is a person who looks on at a game, and <em>spectacles</em> is an old-fashioned word for eyeglasses. Emma's older brother added that the Greek root <em>tele</em> means "far away," which is why a <em>telescope</em> lets you look at distant stars. The more roots they collected, the more the dictionary felt like a puzzle they could finally solve.`,
+     questions:[
+       {id:"d20-r2-1", type:"mc", prompt:`What does the root "spect" mean?`,
+        choices:["To look","To carry","To hear","To run"], answer:0,
+        hint:["Reread the first sentence","'spect' means...","To look"]},
+       {id:"d20-r2-2", type:"mc", prompt:`Based on the roots, what does a "telescope" help you do?`,
+        choices:["Carry heavy objects","Look at things that are far away","Listen to music","Write faster"], answer:1,
+        hint:["'tele' means far, 'scope' means look","Combine them: look far","Look at faraway things like stars"]},
+     ]},
+  ],
+};
+
+const DAY21 = {
+  math:[
+    {id:"d21-m1", type:"text", standard:"MA.4.NSO.2.2", topic:"Multiplying 2- and 3-Digit Numbers",
+     prompt:`Review — Multiply: 46 × 3 = ?`,
+     accept:["138"],
+     hint:["3 × 6 = 18 → write 8, carry 1","3 × 4 = 12, plus 1 = 13","Answer → 138"]},
+    {id:"d21-m2", type:"text", standard:"MA.4.NSO.2.4", topic:"Dividing with Remainders",
+     prompt:`Review — Divide 59 ÷ 8. What is the remainder?`,
+     accept:["3"],
+     hint:["8 × 7 = 56, which fits in 59","59 − 56 = 3","The remainder is 3"]},
+    {id:"d21-m3", type:"text", standard:"MA.4.NSO.2.7", topic:"Adding & Subtracting Decimals",
+     prompt:`Review — Add: 0.6 + 0.35 = ?`,
+     accept:["0.95",".95"],
+     hint:["Think 0.60 + 0.35","0+5=5 hundredths, 6+3=9 tenths","Answer → 0.95"]},
+    {id:"d21-m4", type:"mc", standard:"MA.4.AR.3.1", topic:"Factors, Primes & Composites",
+     prompt:`Review — Which number is PRIME (has only two factors, 1 and itself)?`,
+     choices:["9","15","17","21"], answer:2,
+     hint:["Check each for factors besides 1 and itself","9=3×3, 15=3×5, 21=3×7","17 has no others → 17 is prime"]},
+  ],
+  reading:[
+    {std:"ELA.4.R.1.2", topic:"Theme Development",
+     passage:`After failing their first violin recital, Emma and Leilani both wanted to quit for good. Their teacher gently reminded them that every skilled musician was once a beginner who squeaked and stumbled. So the two friends agreed to practice ten extra minutes each night, even when their fingers ached. Months later, Emma and Leilani played a flawless duet and finally believed that effort could turn mistakes into music.`,
+     questions:[
+       {id:"d21-r1-1", type:"mc", prompt:`Review — What is the THEME of this passage?`,
+        choices:["Music is easy","Practice and effort lead to growth","Recitals are pointless","Teachers are strict"], answer:1,
+        hint:["What do the girls learn over time?","Extra practice turned mistakes into music","Effort leads to growth"]},
+       {id:"d21-r1-2", type:"mc", standard:"ELA.4.V.1.2", topic:"Greek & Latin Roots",
+        prompt:`Review — The root "aud" means "to hear." An <em>audience</em> is a group that ___.`,
+        choices:["reads silently","listens or watches","carries boxes","runs races"], answer:1,
+        hint:["'aud' means to hear","An audience hears a performance","Answer → listens or watches"]},
+     ]},
+    {std:"ELA.4.R.2.2", topic:"Central Idea & Details",
+     passage:`Recycling does more good than many people imagine. Turning old cans and bottles into new products uses far less energy than making them from scratch. Recycling also keeps mountains of trash out of landfills and protects the habitats where animals live. Small choices, repeated by millions of people, can add up to an enormous difference for the planet.`,
+     questions:[
+       {id:"d21-r2-1", type:"mc", prompt:`Review — What is the central idea?`,
+        choices:["Recycling is difficult","Recycling helps the planet in several ways","Landfills are useful","Cans are made of metal"], answer:1,
+        hint:["What is the passage mostly about?","It lists benefits of recycling","Recycling helps the planet"]},
+       {id:"d21-r2-2", type:"mc", standard:"ELA.4.R.2.3", topic:"Author's Perspective",
+        prompt:`Review — How does the author seem to FEEL about recycling?`,
+        choices:["It is a waste of time","It is worthwhile and important","It is confusing","It is only for adults"], answer:1,
+        hint:["Notice the positive reasons given","The author praises recycling's benefits","The author supports it"]},
+     ]},
+  ],
+};
+
+const DAY22 = {
+  math:[
+    {id:"d22-m1", type:"mc", prompt:`Which fraction is EQUIVALENT to ${frac(1,2)}?`,
+     choices:[frac(5,10), frac(2,5), frac(1,3), frac(3,5)], answer:0,
+     hint:["Multiply top and bottom by the same number","1 × 5 = 5 and 2 × 5 = 10",`So ${frac(1,2)} = ${frac(5,10)}`]},
+    {id:"d22-m2", type:"text", prompt:`Write ${frac(7,10)} as a decimal.`,
+     accept:["0.7",".7"],
+     hint:["Tenths become the first decimal place","7 tenths = 0.7","Answer → 0.7"]},
+    {id:"d22-m3", type:"text", prompt:`Fill in the missing number: ${frac(3,4)} = ${frac("?",8)}. What goes on top?`,
+     accept:["6","6/8"],
+     hint:["The bottom went 4 → 8, that is × 2","Do the same on top: 3 × 2","3 × 2 = 6"]},
+    {id:"d22-m4", type:"mc", prompt:`Which decimal equals ${frac(25,100)}?`,
+     choices:["0.25","2.5","0.025","25.0"], answer:0,
+     hint:["Hundredths become two decimal places","25 hundredths = 0.25","Answer → 0.25"]},
+  ],
+  reading:[
+    {std:"ELA.4.R.2.4", topic:"Author's Claim & Evidence",
+     passage:`Schools should start the day a little later, and the science is squarely on my side. Researchers have found that children who get enough sleep score higher on tests and remember far more of what they study. When classes begin too early, exhausted students slump at their desks, struggle to concentrate, and grow easily frustrated. Even thirty extra minutes of morning sleep could lift both their grades and their moods. It is hard to argue with well-rested, happier learners.`,
+     questions:[
+       {id:"d22-r1-1", type:"mc", prompt:`What is the author's CLAIM?`,
+        choices:["Students should sleep in class","Schools should start the day later","Tests are unfair","Mornings are the best time to learn"], answer:1,
+        hint:["A claim is the main opinion","Stated in the first sentence","Schools should start later"]},
+       {id:"d22-r1-2", type:"mc", prompt:`Which piece of EVIDENCE supports the claim?`,
+        choices:["The author dislikes mornings","Researchers found that well-rested children score higher","Buses are noisy","School is boring"], answer:1,
+        hint:["Evidence is a fact that backs the opinion","Research on sleep and test scores","That evidence supports the claim"]},
+     ]},
+    {std:"ELA.4.R.2.4", topic:"Author's Claim & Evidence",
+     passage:`Plastic water bottles are convenient, but I am convinced our school should switch to reusable ones. Every single day, hundreds of plastic bottles are tossed into our trash cans, where they may linger in landfills for centuries without breaking down. Reusable bottles cost a bit more at first, yet over time they actually save money and spare the environment enormous harm. To anyone who cares about the planet, the smarter choice could not be clearer.`,
+     questions:[
+       {id:"d22-r2-1", type:"mc", prompt:`What is the author's claim?`,
+        choices:["Plastic bottles are the best choice","The school should switch to reusable bottles","Water is unhealthy","Recycling is impossible"], answer:1,
+        hint:["Find the main opinion","The author wants a switch to reusable bottles","That is the claim"]},
+       {id:"d22-r2-2", type:"mc", prompt:`Which evidence does the author use?`,
+        choices:["Plastic bottles may sit in landfills for centuries","Reusable bottles are ugly","Water tastes better cold","Everyone loves plastic"], answer:0,
+        hint:["Look for a supporting fact","Plastic lingering for centuries is the evidence","That backs the claim"]},
+     ]},
+  ],
+};
+
+const DAY23 = {
+  math:[
+    {id:"d23-m1", type:"text", prompt:`Add: ${frac(1,5)} + ${frac(3,5)} = ? (type like 4/5)`,
+     accept:["4/5"],
+     hint:["Same denominator (5) stays the same","Add the tops: 1 + 3 = 4",`Answer → ${frac(4,5)}`]},
+    {id:"d23-m2", type:"text", prompt:`Subtract: ${frac(5,8)} − ${frac(2,8)} = ? (type like 3/8)`,
+     accept:["3/8"],
+     hint:["Denominator (8) stays the same","Subtract the tops: 5 − 2 = 3",`Answer → ${frac(3,8)}`]},
+    {id:"d23-m3", type:"mc", prompt:`Emma ate ${frac(2,6)} of a pie and Maya ate ${frac(3,6)}. How much did they eat TOGETHER?`,
+     choices:[frac(5,6), frac(5,12), frac(1,6), frac(6,6)], answer:0,
+     hint:["Same denominator (6)","Add the tops: 2 + 3 = 5",`Answer → ${frac(5,6)}`]},
+    {id:"d23-m4", type:"text", prompt:`Subtract: ${frac(7,10)} − ${frac(4,10)} = ? (type like 3/10)`,
+     accept:["3/10"],
+     hint:["Denominator (10) stays the same","7 − 4 = 3",`Answer → ${frac(3,10)}`]},
+  ],
+  reading:[
+    {std:"ELA.4.R.3.1", topic:"Interpreting Figurative Language",
+     passage:`The old oak tree in Emma's backyard was a patient giant that had watched over the neighborhood for a hundred years. In autumn, its golden leaves whispered secrets to the passing wind, and in winter its bare arms reached toward the pale gray sky. Emma liked to imagine that the tree remembered every child who had ever climbed its sturdy branches. To her, it was less a plant than a quiet, ancient friend who never needed to speak.`,
+     questions:[
+       {id:"d23-r1-1", type:"mc", prompt:`The tree is called "a patient giant." This METAPHOR suggests the tree is ___.`,
+        choices:["small and weak","huge and enduring","noisy and busy","brand new"], answer:1,
+        hint:["A giant is enormous; patient means it waits calmly","The tree has stood for a hundred years","Huge and enduring"]},
+       {id:"d23-r1-2", type:"mc", prompt:`"Its leaves whispered secrets to the wind" is an example of ___.`,
+        choices:["personification (giving human actions to a thing)","a fact","a rhyme","a question"], answer:0,
+        hint:["Leaves cannot really whisper","Giving human actions to an object is...","Personification"]},
+     ]},
+    {std:"ELA.4.R.3.1", topic:"Interpreting Figurative Language",
+     passage:`When Emma froze in the middle of her speech, her best friend Leilani smiled from the front row and whispered, "Don't worry — everyone gets butterflies sometimes." Emma knew perfectly well there were no insects fluttering in her stomach; the phrase simply meant she felt nervous. Afterward, Leilani told her she had "knocked it out of the park," even though there was no baseball in sight. Emma laughed, realizing that English is stuffed with colorful phrases that mean something very different from their actual words.`,
+     questions:[
+       {id:"d23-r2-1", type:"mc", prompt:`What does the idiom "butterflies in your stomach" mean?`,
+        choices:["Feeling hungry","Feeling nervous","Feeling sleepy","Feeling sick"], answer:1,
+        hint:["Emma felt this way during her speech","The passage says it means she felt...","Nervous"]},
+       {id:"d23-r2-2", type:"mc", prompt:`What does "knocked it out of the park" mean here?`,
+        choices:["Broke a window","Did something extremely well","Lost the game","Left early"], answer:1,
+        hint:["It is praise from a classmate","It means she did a great job","Did something extremely well"]},
+     ]},
+  ],
+};
+
+const DAY24 = {
+  math:[
+    {id:"d24-m1", type:"text", prompt:`Multiply: 3 × ${frac(1,4)} = ? (type like 3/4)`,
+     accept:["3/4"],
+     hint:["3 groups of one-fourth","Add the tops: 1+1+1 = 3, keep the 4",`Answer → ${frac(3,4)}`]},
+    {id:"d24-m2", type:"text", prompt:`Multiply: 2 × ${frac(2,5)} = ? (type like 4/5)`,
+     accept:["4/5"],
+     hint:["2 groups of two-fifths","2 × 2 = 4 on top, keep the 5",`Answer → ${frac(4,5)}`]},
+    {id:"d24-m3", type:"mc", prompt:`Emma jogs ${frac(1,3)} of a mile each day. How far does she jog in 6 days?`,
+     choices:["1 mile","2 miles","3 miles","6 miles"], answer:1,
+     hint:[`6 × ${frac(1,3)} = ${frac(6,3)}`,"6 ÷ 3 = 2","Answer → 2 miles"]},
+    {id:"d24-m4", type:"text", prompt:`Multiply: 4 × ${frac(3,8)} = ? (type as an improper fraction like 12/8)`,
+     accept:["12/8","3/2","1 1/2","1.5"],
+     hint:["4 × 3 = 12 on top, keep the 8",`That is ${frac(12,8)}`,"Answer → 12/8 (also 1½)"]},
+  ],
+  reading:[
+    {std:"ELA.4.V.1.3", topic:"Words in Context",
+     passage:`The exhausted hikers were relieved when the fierce storm finally began to <em>abate</em>. The pounding rain softened into a gentle drizzle, the howling wind died down to a whisper, and pale sunlight crept through the thinning clouds. Within an hour, the sky over the mountains was calm and clear once more. That night, Emma wrote in her journal that the weather had abated just in time for them to cook dinner.`,
+     questions:[
+       {id:"d24-r1-1", type:"mc", prompt:`In this passage, "abate" means ___.`,
+        choices:["to grow stronger","to lessen or die down","to disappear forever","to freeze"], answer:1,
+        hint:["Notice what happens after the storm 'abates'","Rain softens, wind dies down","It means to lessen"]},
+       {id:"d24-r1-2", type:"mc", prompt:`Which clue in the passage helped you the most?`,
+        choices:["The hikers were tired","The rain softened and the wind died down","Emma kept a journal","It was nighttime"], answer:1,
+        hint:["A context clue shows the word's meaning","Softening rain and dying wind show 'lessening'","That is the clue"]},
+     ]},
+    {std:"ELA.4.V.1.3", topic:"Words in Context",
+     passage:`Emma's little brother could be so <em>obstinate</em> that no amount of arguing would ever change his mind. When their mother asked him to put on a coat, he crossed his arms and flatly refused, even as he shivered in the frosty air. He insisted, again and again, that he felt perfectly warm, ignoring every sensible point his family made. Emma finally sighed; once her brother decided something, there was simply no convincing him otherwise.`,
+     questions:[
+       {id:"d24-r2-1", type:"mc", prompt:`In this passage, "obstinate" means ___.`,
+        choices:["friendly","stubborn","tired","funny"], answer:1,
+        hint:["He refused to change his mind no matter what","Crossing arms and refusing shows stubbornness","Obstinate = stubborn"]},
+       {id:"d24-r2-2", type:"mc", prompt:`Which detail is the strongest CLUE to the word's meaning?`,
+        choices:["He shivered in the cold","He refused and ignored every sensible point","His mother asked nicely","Emma sighed"], answer:1,
+        hint:["Which detail shows he won't budge?","Refusing and ignoring good reasons shows stubbornness","That is the clue"]},
+     ]},
+  ],
+};
+
+const DAY25 = {
+  math:[
+    {id:"d25-m1", type:"mc", prompt:`An angle that measures exactly 90° is called a ___ angle.`,
+     choices:["acute","right","obtuse","straight"], answer:1,
+     hint:["90° makes a square corner","A square corner is a right angle","Answer → right"]},
+    {id:"d25-m2", type:"mc", prompt:`An angle that is SMALLER than 90° is called ___.`,
+     choices:["acute","right","obtuse","straight"], answer:0,
+     hint:["Smaller than a square corner","A small, sharp angle is acute","Answer → acute"]},
+    {id:"d25-m3", type:"mc", prompt:`An angle BETWEEN 90° and 180° is called ___.`,
+     choices:["acute","right","obtuse","straight"], answer:2,
+     hint:["Bigger than a right angle but not a straight line","A wide, open angle is obtuse","Answer → obtuse"]},
+    {id:"d25-m4", type:"text", prompt:`A STRAIGHT angle (a flat line) measures how many degrees?`,
+     accept:["180","180 degrees","180°"],
+     hint:["A straight line is two right angles together","90 + 90","Answer → 180"]},
+  ],
+  reading:[
+    {std:"ELA.4.C.1.4", topic:"Organized Informative Writing",
+     passage:`Emma is writing an informative paragraph but needs the best opening sentence. Here is her paragraph so far:<br><em>"________. Penguins huddle together in enormous groups to trap warmth against the freezing wind. A thick layer of fat and waterproof feathers seals out the cold. Some penguins even balance their eggs on top of their feet to keep them off the icy ground."</em>`,
+     questions:[
+       {id:"d25-r1-1", type:"mc", prompt:`Which is the BEST topic sentence to begin the paragraph?`,
+        choices:["Penguins have several clever ways to survive the freezing cold.","Penguins are black and white.","I once saw a penguin at the zoo.","Winter is my favorite season."], answer:0,
+        hint:["A topic sentence should introduce the MAIN idea","The paragraph is about how penguins stay warm","Pick the sentence about surviving the cold"]},
+       {id:"d25-r1-2", type:"mc", prompt:`Which sentence would NOT belong in this paragraph?`,
+        choices:["Their feathers are waterproof.","Penguins star in many funny cartoons.","Fat helps seal out the cold.","They huddle to trap warmth."], answer:1,
+        hint:["Find the sentence that is off-topic","The paragraph is about surviving cold, not cartoons","That one does not belong"]},
+     ]},
+    {std:"ELA.4.C.1.4", topic:"Organized Informative Writing",
+     passage:`Emma is writing a report about recycling. So far she has three supporting sentences:<br><em>"Recycling saves energy. It keeps trash out of landfills. It protects the habitats where animals live."</em><br>She needs a strong beginning and ending.`,
+     questions:[
+       {id:"d25-r2-1", type:"mc", prompt:`Which is the best TOPIC sentence to go FIRST?`,
+        choices:["Recycling helps our planet in several important ways.","My bin is blue.","I forgot to recycle yesterday.","Trash smells bad."], answer:0,
+        hint:["The first sentence should state the main idea","Her sentences all list benefits of recycling","Pick the one that introduces that idea"]},
+       {id:"d25-r2-2", type:"mc", prompt:`Which is the best CONCLUDING sentence to go LAST?`,
+        choices:["For all these reasons, recycling is worth the effort.","Bananas are yellow.","I like recess.","The end."], answer:0,
+        hint:["A conclusion wraps up the main idea","It should restate why recycling matters","Pick the summary sentence"]},
+     ]},
+  ],
+};
+
+const DAY26 = {
+  math:[
+    {id:"d26-m1", type:"text", prompt:`There are 12 inches in 1 foot. How many inches are in 2 feet?`,
+     accept:["24","24 inches"],
+     hint:["12 inches in each foot","2 × 12","Answer → 24 inches"]},
+    {id:"d26-m2", type:"text", prompt:`There are 100 centimeters in 1 meter. How many centimeters are in 3 meters?`,
+     accept:["300","300 cm","300 centimeters"],
+     hint:["100 cm in each meter","3 × 100","Answer → 300 cm"]},
+    {id:"d26-m3", type:"mc", prompt:`How many cups are in 1 quart?`,
+     choices:["2","4","8","16"], answer:1,
+     hint:["1 quart = 2 pints, and 1 pint = 2 cups","2 × 2 = 4","Answer → 4 cups"]},
+    {id:"d26-m4", type:"text", prompt:`Emma's jump rope is 5 feet long. How many INCHES is that? (12 inches = 1 foot)`,
+     accept:["60","60 inches"],
+     hint:["12 inches in each foot","5 × 12","Answer → 60 inches"]},
+  ],
+  reading:[
+    {std:"ELA.4.C.3.1", topic:"Grammar & Conventions",
+     passage:`Emma is proofreading her writing to catch grammar and punctuation mistakes. Help her choose the sentence that follows the rules of standard English correctly.`,
+     questions:[
+       {id:"d26-r1-1", type:"mc", prompt:`Which sentence is CORRECT?`,
+        choices:["The dogs runs fast.","The dogs run fast.","The dog run fast.","The dogs running fast."], answer:1,
+        hint:["A plural subject (dogs) needs a plural verb","'The dogs run' agrees correctly","Answer → The dogs run fast."]},
+       {id:"d26-r1-2", type:"mc", prompt:`Which sentence uses COMMAS correctly?`,
+        choices:["We bought apples oranges and pears.","We bought apples, oranges, and pears.","We bought, apples oranges pears.","We, bought apples oranges pears."], answer:1,
+        hint:["Use commas to separate items in a list","apples, oranges, and pears","The second sentence is correct"]},
+     ]},
+    {std:"ELA.4.C.3.1", topic:"Grammar & Conventions",
+     passage:`Emma is checking her sentences for correct capitalization and spelling. Choose the best answer for each question.`,
+     questions:[
+       {id:"d26-r2-1", type:"mc", prompt:`Which sentence is capitalized CORRECTLY?`,
+        choices:["my family visited orlando in july.","My family visited Orlando in July.","My Family visited orlando in july.","my Family Visited Orlando in July."], answer:1,
+        hint:["Capitalize the first word, names of places, and months","Orlando and July are proper nouns","The second sentence is correct"]},
+       {id:"d26-r2-2", type:"mc", prompt:`Which word is spelled CORRECTLY?`,
+        choices:["freind","friend","frend","friennd"], answer:1,
+        hint:["Remember the rule: i before e","f-r-i-e-n-d","Answer → friend"]},
+     ]},
+  ],
+};
+
+const DAY27 = {
+  math:[
+    {id:"d27-m1", type:"text", prompt:`Emma measured 5 plants (in cm): 4, 6, 6, 8, 6. What is the MODE (the value that appears most)?`,
+     accept:["6","6 cm"],
+     hint:["Which number shows up most often?","6 appears three times","Answer → 6"]},
+    {id:"d27-m2", type:"text", prompt:`For the data 4, 6, 6, 8, 6, what is the RANGE (biggest minus smallest)?`,
+     accept:["4","4 cm"],
+     hint:["Biggest = 8, smallest = 4","8 − 4","Answer → 4"]},
+    {id:"d27-m3", type:"mc", prompt:`Put in order: 4, 6, 6, 6, 8. What is the MEDIAN (the middle value)?`,
+     choices:["4","5","6","8"], answer:2,
+     hint:["The numbers are already in order","The middle one (3rd of 5) is 6","Answer → 6"]},
+    {id:"d27-m4", type:"text", prompt:`Emma's three test scores are 80, 90, and 100. What is the RANGE?`,
+     accept:["20"],
+     hint:["Biggest = 100, smallest = 80","100 − 80","Answer → 20"]},
+  ],
+  reading:[
+    {std:"ELA.4.R.3.3", topic:"Comparing Accounts & Sources",
+     passage:`Emma and Leilani wrote about the very same field trip to the aquarium, yet their reports read completely differently. Emma wrote that the highlight was the massive shark tank, where she pressed her face against the cool glass for nearly an hour, mesmerized. Leilani, on the other hand, barely mentioned the sharks at all; her report focused almost entirely on the touch pool, where she cradled a spiny sea star in her palm. Reading both reports side by side, their teacher realized that two people can experience the exact same day in completely different ways.`,
+     questions:[
+       {id:"d27-r1-1", type:"mc", prompt:`How do Emma's and Leilani's accounts DIFFER?`,
+        choices:["Emma focused on the shark tank; Leilani focused on the touch pool","They visited different aquariums","Neither enjoyed the trip","They wrote about the gift shop"], answer:0,
+        hint:["What did each girl focus on?","Emma → sharks; Leilani → touch pool","They noticed different things"]},
+       {id:"d27-r1-2", type:"mc", prompt:`What did BOTH accounts have in common?`,
+        choices:["Both describe the same aquarium field trip","Both disliked the sharks","Both wrote about sea stars","Both left early"], answer:0,
+        hint:["What is the same in both reports?","They describe the same field trip","That is what they share"]},
+     ]},
+    {std:"ELA.4.R.3.3", topic:"Comparing Accounts & Sources",
+     passage:`For her history report, Emma studied the first Moon landing. She listened to a recording of astronaut Neil Armstrong speaking from the Moon's surface in 1969 — a <em>primary source</em>, created by someone who was actually there. She also read a magazine article written just last year that summarized the mission — a <em>secondary source</em>, made much later by a writer who studied the event. Emma learned that primary sources come straight from the moment, while secondary sources explain and interpret it afterward.`,
+     questions:[
+       {id:"d27-r2-1", type:"mc", prompt:`Which is a PRIMARY source?`,
+        choices:["The magazine article from last year","Neil Armstrong's 1969 recording from the Moon","Emma's history textbook","A modern website"], answer:1,
+        hint:["A primary source comes from someone who was there","Armstrong spoke from the Moon in 1969","That is the primary source"]},
+       {id:"d27-r2-2", type:"mc", prompt:`A SECONDARY source is one that ___.`,
+        choices:["is made later by someone who studied the event","is always a photograph","comes straight from the moment","can never be trusted"], answer:0,
+        hint:["Reread the last sentence","Secondary sources explain the event afterward","Made later by someone who studied it"]},
+     ]},
+  ],
+};
+
+const DAY28 = {
+  math:[
+    {id:"d28-m1", type:"mc", standard:"MA.4.NSO.1.1", topic:"Place Value to 1,000,000",
+     prompt:`Graduation — In 640,000, what is the VALUE of the digit 4?`,
+     choices:["400","4,000","40,000","400,000"], answer:2,
+     hint:["The 4 is in the ten-thousands place","4 × 10,000","Answer → 40,000"]},
+    {id:"d28-m2", type:"text", standard:"MA.4.NSO.2.2", topic:"Multiplying 2- and 3-Digit Numbers",
+     prompt:`Graduation — Multiply: 128 × 3 = ?`,
+     accept:["384"],
+     hint:["3 × 8 = 24 → write 4, carry 2","3 × 2 = 6, plus 2 = 8","3 × 1 = 3","Answer → 384"]},
+    {id:"d28-m3", type:"text", standard:"MA.4.FR.2.2", topic:"Adding & Subtracting Fractions",
+     prompt:`Graduation — Add: ${frac(3,8)} + ${frac(4,8)} = ? (type like 7/8)`,
+     accept:["7/8"],
+     hint:["Denominator (8) stays the same","3 + 4 = 7 on top",`Answer → ${frac(7,8)}`]},
+    {id:"d28-m4", type:"text", standard:"MA.4.GR.1.1", topic:"Classifying & Measuring Angles",
+     prompt:`Graduation — A RIGHT angle measures how many degrees?`,
+     accept:["90","90 degrees","90°"],
+     hint:["A right angle is a square corner","It measures exactly...","Answer → 90"]},
+  ],
+  reading:[
+    {std:"ELA.4.R.1.2", topic:"Theme Development",
+     passage:`For weeks, Emma had dreamed of winning the school science fair, imagining the shiny blue ribbon in her hands. When the judges awarded her team only second place, disappointment stung sharply. Then she noticed her teammate and best friend, Leilani, beaming with pride at what they had built together. In that moment Emma realized that the fun of creating something with a friend mattered far more than any ribbon. She surprised herself by feeling truly happy.`,
+     questions:[
+       {id:"d28-r1-1", type:"mc", prompt:`Graduation — What is the THEME of this passage?`,
+        choices:["Winning is the only thing that matters","Sharing an experience can matter more than a prize","Science fairs are unfair","Ribbons are expensive"], answer:1,
+        hint:["What does Emma realize at the end?","Creating with a friend mattered more than the ribbon","That is the theme"]},
+       {id:"d28-r1-2", type:"mc", standard:"ELA.4.R.1.1", topic:"Analyzing Plot & Character",
+        prompt:`Graduation — How do Emma's feelings CHANGE during the passage?`,
+        choices:["From disappointed to genuinely happy","From happy to angry","From bored to sleepy","They never change"], answer:0,
+        hint:["Notice her feelings at the start vs. the end","She starts stung by disappointment, ends happy","Disappointed → happy"]},
+     ]},
+    {std:"ELA.4.R.2.2", topic:"Central Idea & Details",
+     passage:`Coral reefs are sometimes called the rainforests of the sea, and for good reason. Though reefs cover only a tiny fraction of the ocean floor, they shelter about one quarter of all ocean species. Tiny animals called coral polyps build the reef's stony structure over hundreds of years, creating hiding places, nurseries, and hunting grounds for countless creatures. Sadly, warming waters and pollution now threaten these fragile underwater cities, and scientists are racing to protect them.`,
+     questions:[
+       {id:"d28-r2-1", type:"mc", prompt:`Graduation — What is the CENTRAL IDEA of this passage?`,
+        choices:["Coral reefs are colorful","Coral reefs are vital ocean habitats that need protection","Rainforests are underwater","Polyps are large animals"], answer:1,
+        hint:["What is the whole passage mostly about?","Reefs shelter many species and are now threatened","They are vital habitats needing protection"]},
+       {id:"d28-r2-2", type:"mc", standard:"ELA.4.R.2.3", topic:"Author's Perspective",
+        prompt:`Graduation — How does the author seem to feel about coral reefs?`,
+        choices:["They are unimportant","They are valuable and worth protecting","They are dangerous","They are boring"], answer:1,
+        hint:["Notice words like 'vital' and 'racing to protect them'","The author admires and wants to save reefs","Valuable and worth protecting"]},
+     ]},
+  ],
+};
+
+/* ---------- Template builder (unused once all days authored; kept for safety) ---------- */
+function buildTemplateDay(entry){
+  const kind = entry.review ? "Weekly Review" : (entry.grad ? "Graduation Quiz" : "Daily Practice");
+  const mathTopic = entry.mathTitle;
+  const elaTopic = entry.elaTitle;
+  const mathPool = [
+    {q:`Sample problem (placeholder) for "${mathTopic}": 24 + 18 = ?`, accept:["42"], hint:["24 + 18","Answer → 42"]},
+    {q:`Sample problem (placeholder) for "${mathTopic}": 56 − 19 = ?`, accept:["37"], hint:["56 − 19","Answer → 37"]},
+    {q:`Sample problem (placeholder) for "${mathTopic}": 9 × 6 = ?`, accept:["54"], hint:["9 × 6","Answer → 54"]},
+    {q:`Sample problem (placeholder) for "${mathTopic}": 48 ÷ 6 = ?`, accept:["8"], hint:["48 ÷ 6","Answer → 8"]},
+  ];
+  const math = mathPool.map((p,i)=>({ id:`d${entry.day}-m${i+1}`, type:"text", placeholder:true, prompt:p.q, accept:p.accept, hint:p.hint }));
+  const reading = [1,2].map(mi=>({
+    std:entry.elaStd, topic:elaTopic, placeholder:true,
+    passage:`(Placeholder passage — ${kind}.) Practicing "${elaTopic}". Real story text is coming soon!`,
+    questions:[
+      {id:`d${entry.day}-r${mi}-1`, type:"mc", placeholder:true, prompt:`Sample question: This passage is about which skill?`, choices:[elaTopic, "Long division", "Telling time", "None of these"], answer:0, hint:[`Answer → ${elaTopic}`]},
+      {id:`d${entry.day}-r${mi}-2`, type:"text", placeholder:true, prompt:`Sample question: Type this student's name.`, accept:["emma","leilani"], hint:["It is in the title"]},
+    ],
+  }));
+  return {math, reading};
+}
+
+/* ---------- Assemble full 28-day curriculum ---------- */
+const AUTHORED = {
+  1:DAY1, 2:DAY2, 3:DAY3, 4:DAY4, 5:DAY5, 6:DAY6, 7:DAY7,
+  8:DAY8, 9:DAY9, 10:DAY10, 11:DAY11, 12:DAY12, 13:DAY13, 14:DAY14,
+  15:DAY15, 16:DAY16, 17:DAY17, 18:DAY18, 19:DAY19, 20:DAY20, 21:DAY21,
+  22:DAY22, 23:DAY23, 24:DAY24, 25:DAY25, 26:DAY26, 27:DAY27, 28:DAY28,
+};
+const CURRICULUM = STANDARDS.map(entry=>{
+  let content;
+  let placeholder = false;
+  if(AUTHORED[entry.day]) content = AUTHORED[entry.day];
+  else { content = buildTemplateDay(entry); placeholder = true; }
+  return {
+    day: entry.day, week: entry.week,
+    mathStd: entry.mathStd, mathTitle: entry.mathTitle,
+    elaStd: entry.elaStd, elaTitle: entry.elaTitle,
+    review: !!entry.review, grad: !!entry.grad,
+    placeholder,
+    math: content.math,
+    reading: content.reading,
+  };
+});
+
+CURRICULUM.forEach(d=>{
+  d.math.forEach(q=>{ q.subject="Math"; q.standard=q.standard||d.mathStd; q.topic=q.topic||d.mathTitle; q.day=d.day; });
+  d.reading.forEach(m=>{
+    m.questions.forEach(q=>{ q.subject="Reading"; q.standard=q.standard||m.std; q.topic=q.topic||m.topic; q.day=d.day; });
+  });
+});
+
+/* Personalise stories for this file (swaps Emma<->Leilani when SWAP_NAMES is on) */
+if(SWAP_NAMES) deepSwapNames(CURRICULUM);
+
+function dayQuestions(d){
+  const out = [];
+  d.math.forEach(q=>out.push(q));
+  d.reading.forEach(m=>m.questions.forEach(q=>out.push(q)));
+  return out;
+}
+
+/* ============================================================
+   STATE + PERSISTENCE
+   ============================================================ */
+let STATE = loadState();
+migrateState();
+
+function defaultState(){ return { solved:{}, completedDays:[], analytics:{} }; }
+function migrateState(){
+  if(STATE.contentVersion === 2) return;
+  const isWeek1 = id => /^d[1-7]-/.test(id);
+  Object.keys(STATE.solved || {}).forEach(id=>{ if(!isWeek1(id)) delete STATE.solved[id]; });
+  Object.keys(STATE.analytics || {}).forEach(id=>{ if(!isWeek1(id)) delete STATE.analytics[id]; });
+  STATE.completedDays = (STATE.completedDays || []).filter(d => d >= 1 && d <= 7);
+  STATE.contentVersion = 2;
+  saveState();
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(defaultState(), parsed);
+  }catch(e){ return defaultState(); }
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); }catch(e){}
+}
+
+function recordAttempt(q, isCorrect){
+  const a = STATE.analytics;
+  if(!a[q.id]){
+    a[q.id] = { subject:q.subject, standard:q.standard, topic:q.topic, day:q.day, attempts:0, solved:false, firstTry:false, retries:0 };
+  }
+  const rec = a[q.id];
+  if(rec.solved) return;
+  rec.attempts += 1;
+  if(isCorrect){ rec.solved = true; rec.firstTry = (rec.attempts === 1); rec.retries = rec.attempts - 1; }
+  else { rec.retries = rec.attempts - 1; }
+  saveState();
+}
+
+function isDayComplete(d){ return dayQuestions(d).every(q => STATE.solved[q.id]); }
+function markSolved(q){ STATE.solved[q.id] = true; saveState(); }
+function updateDayCompletion(d){
+  const complete = isDayComplete(d);
+  const idx = STATE.completedDays.indexOf(d.day);
+  if(complete && idx === -1){ STATE.completedDays.push(d.day); saveState(); return true; }
+  if(!complete && idx !== -1){ STATE.completedDays.splice(idx,1); saveState(); }
+  return false;
+}
+function resetDay(d){
+  dayQuestions(d).forEach(q=>{ delete STATE.solved[q.id]; delete STATE.analytics[q.id]; });
+  const idx = STATE.completedDays.indexOf(d.day);
+  if(idx !== -1) STATE.completedDays.splice(idx,1);
+  saveState();
+}
+
+/* ============================================================
+   DASHBOARD RENDER
+   ============================================================ */
+const weeksGrid = document.getElementById("weeksGrid");
+const WEEKS = {
+  1:{name:"3rd Grade Mastery",       emoji:"🌱", blurb:"Numbers, operations & fractions you already know", grad:"linear-gradient(135deg,var(--pink),var(--accent))"},
+  2:{name:"3rd Grade Mastery · Pt 2",emoji:"📐", blurb:"Reasoning, time, geometry & data",                 grad:"linear-gradient(135deg,var(--pink-hover),var(--accent))"},
+  3:{name:"Bridge to 4th Grade",     emoji:"🌉", blurb:"Big numbers, division & an intro to decimals",      grad:"linear-gradient(135deg,var(--deep-rose),var(--pink))"},
+  4:{name:"4th Grade Launch",        emoji:"🚀", blurb:"Fractions, angles, measurement & data",             grad:"linear-gradient(135deg,var(--deep-rose-2),var(--accent))"},
+};
+
+let openWeekNum = (function(){
+  const firstOpen = CURRICULUM.find(d=>!isDayComplete(d));
+  return firstOpen ? firstOpen.week : 1;
+})();
+
+function weekStats(w){
+  const days = CURRICULUM.filter(d=>d.week===w);
+  const done = days.filter(d=>isDayComplete(d)).length;
+  return {done, total:days.length, pct:Math.round((done/days.length)*100)};
+}
+function weekUnlocked(w){
+  if(w <= 1) return true;
+  const prev = weekStats(w-1);
+  return prev.done === prev.total;
+}
+
+function renderDashboard(){
+  weeksGrid.innerHTML = "";
+  for(let w=1; w<=4; w++){ weeksGrid.appendChild(renderWeekPanel(w)); }
+  updateProgress();
+}
+
+function renderWeekPanel(w){
+  const meta = WEEKS[w];
+  const st = weekStats(w);
+  const unlocked = weekUnlocked(w);
+  const isOpen = (openWeekNum === w) && unlocked;
+  const panel = document.createElement("div");
+  panel.className = "week-panel" + (isOpen ? " open" : "") + (st.done===st.total ? " week-done" : "") + (unlocked ? "" : " locked");
+
+  const header = document.createElement("button");
+  header.className = "week-header";
+  header.style.background = meta.grad;
+  header.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  header.setAttribute("aria-controls", `week-body-${w}`);
+  if(!unlocked){
+    header.setAttribute("aria-label", `Week ${w}: ${meta.name}. Locked. Finish Week ${w-1} to unlock.`);
+    header.setAttribute("aria-disabled", "true");
+    header.innerHTML = `
+      <span class="wh-emoji" aria-hidden="true">🔒</span>
+      <span class="wh-text">
+        <span class="wh-title">Week ${w} · ${meta.name}</span>
+        <span class="wh-blurb">🔒 Finish Week ${w-1} to unlock this week</span>
+      </span>
+      <span class="wh-right">
+        <span class="wh-count">Locked</span>
+      </span>`;
+  } else {
+    header.setAttribute("aria-label", `Week ${w}: ${meta.name}. ${st.done} of ${st.total} days complete. ${isOpen ? "Expanded" : "Collapsed"}. Press Enter to ${isOpen?"collapse":"expand"}.`);
+    header.innerHTML = `
+      <span class="wh-emoji" aria-hidden="true">${meta.emoji}</span>
+      <span class="wh-text">
+        <span class="wh-title">Week ${w} · ${meta.name} ${st.done===st.total?'🏆':''}</span>
+        <span class="wh-blurb">${meta.blurb}</span>
+      </span>
+      <span class="wh-right">
+        <span class="wh-count">${st.done}/${st.total} days</span>
+        <span class="wh-ring" style="background:conic-gradient(#fff ${st.pct}%, rgba(255,255,255,.3) ${st.pct}%)"><span>${st.pct}%</span></span>
+        <span class="wh-chevron" aria-hidden="true">▸</span>
+      </span>`;
+  }
+  header.addEventListener("click", ()=>toggleWeek(w));
+
+  const body = document.createElement("div");
+  body.className = "week-body";
+  body.id = `week-body-${w}`;
+  if(unlocked){
+    const grid = document.createElement("div");
+    grid.className = "days-grid";
+    CURRICULUM.filter(d=>d.week===w).forEach(d=>grid.appendChild(renderDayCard(d)));
+    body.appendChild(grid);
+  } else {
+    const msg = document.createElement("div");
+    msg.className = "locked-note";
+    msg.innerHTML = `🔒 <strong>Week ${w} is locked.</strong> Complete all 7 days of Week ${w-1} to unlock it. Keep going — you're getting closer!`;
+    body.appendChild(msg);
+  }
+
+  panel.appendChild(header);
+  panel.appendChild(body);
+  return panel;
+}
+
+function toggleWeek(w){
+  if(!weekUnlocked(w)) return;
+  openWeekNum = (openWeekNum === w) ? 0 : w;
+  renderDashboard();
+}
+function openWeek(w){
+  openWeekNum = w;
+  renderDashboard();
+  const panel = weeksGrid.children[w-1];
+  if(panel && panel.scrollIntoView) panel.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function renderDayCard(d){
+  const qs = dayQuestions(d);
+  const solvedCount = qs.filter(q=>STATE.solved[q.id]).length;
+  const done = isDayComplete(d);
+  const card = document.createElement("div");
+  card.className = "day-card" + (done ? " done" : "");
+  card.setAttribute("role","button");
+  card.setAttribute("tabindex","0");
+  const kindLabel = d.grad ? "Graduation Quiz" : (d.review ? "Weekly Review" : "");
+  const label = `Day ${d.day}: Math — ${d.mathTitle}; Reading — ${d.elaTitle}. ${solvedCount} of ${qs.length} questions complete. ${done ? "Completed." : "Not yet complete."} Press Enter to open.`;
+  card.setAttribute("aria-label", label);
+  const pct = Math.round((solvedCount/qs.length)*100);
+  card.innerHTML = `
+    <div class="status-badge" aria-hidden="true">${done ? "✅" : FLOWER}</div>
+    <div class="daynum">Day ${d.day}${kindLabel?` · ${kindLabel}`:""}</div>
+    <div class="topic-line"><span class="tl-icon" aria-hidden="true">📗</span><span>${d.mathTitle}</span></div>
+    <div class="topic-line"><span class="tl-icon" aria-hidden="true">📖</span><span>${d.elaTitle}</span></div>
+    ${d.placeholder ? '<span class="placeholder-tag">🔧 Template — content coming soon</span>' : ''}
+    <div class="mini-prog" aria-hidden="true"><span style="width:${pct}%"></span></div>
+  `;
+  card.addEventListener("click", ()=>openDay(d));
+  card.addEventListener("keydown", e=>{ if(e.key==="Enter" || e.key===" "){ e.preventDefault(); openDay(d); } });
+  return card;
+}
+
+function updateProgress(){
+  const done = STATE.completedDays.length;
+  const pct = Math.round((done/28)*100);
+  const fill = document.getElementById("progressFill");
+  const bar = document.getElementById("progressBar");
+  fill.style.width = pct + "%";
+  fill.textContent = pct + "%";
+  bar.setAttribute("aria-valuenow", pct);
+  const streak = document.getElementById("streakMsg");
+  let msg;
+  if(done===0) msg = `🌟 Ready when you are, ${NAME} — tap Day 1 to begin!`;
+  else if(done<7) msg = `🔥 ${done} day${done>1?'s':''} down! Keep the streak going, ${NAME}!`;
+  else if(done<14) msg = `💪 ${done} days complete — Week 1 legend, ${NAME}!`;
+  else if(done<21) msg = `🚀 ${done} days done — you're over halfway, ${NAME}!`;
+  else if(done<28) msg = `🏆 ${done} days! The graduation quiz is in sight, ${NAME}!`;
+  else msg = `🎓 All 28 days complete! ${NAME}, you're 4th-grade ready!`;
+  streak.textContent = msg;
+}
+
+/* ============================================================
+   DAY MODAL
+   ============================================================ */
+const dayOverlay = document.getElementById("dayOverlay");
+const dayModalBody = document.getElementById("dayModalBody");
+let currentDay = null;
+let lastFocused = null;
+
+function distinctStds(qs, subject){
+  const seen = [];
+  qs.filter(q=>q.subject===subject).forEach(q=>{ if(!seen.includes(q.standard)) seen.push(q.standard); });
+  return seen.join(" · ");
+}
+function openDay(d){
+  if(!weekUnlocked(d.week)) return;
+  currentDay = d;
+  lastFocused = document.activeElement;
+  document.getElementById("dayModalTitle").textContent = `Day ${d.day} — ${d.review ? "Weekly Review" : (d.grad ? "Graduation Quiz" : d.mathTitle)}`;
+  const qs = dayQuestions(d);
+  document.getElementById("dayModalStds").innerHTML =
+    `📗 Math B.E.S.T.: ${distinctStds(qs,"Math")} &nbsp;|&nbsp; 📖 Reading B.E.S.T.: ${distinctStds(qs,"Reading")}`;
+  renderDayBody(d);
+  dayOverlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+  dayModalBody.scrollTop = 0;
+  document.getElementById("dayClose").focus();
+}
+function closeDay(){
+  dayOverlay.classList.remove("open");
+  document.body.style.overflow = "";
+  if(currentDay) openWeekNum = currentDay.week;
+  renderDashboard();
+  if(lastFocused) lastFocused.focus();
+}
+
+function renderDayBody(d){
+  const complete = isDayComplete(d);
+  const nextDay = CURRICULUM.find(x=>x.day===d.day+1);
+  let html = "";
+  html += `<div class="day-banner ${complete ? 'show':''}" id="dayBanner">
+    <div class="db-msg">🎉 Way to go, ${NAME}! You finished Day ${d.day}! 🎉</div>
+    <div class="db-actions">
+      <button class="nav-btn back" id="navBackBtn">📚 Back to Week ${d.week}</button>
+      ${nextDay
+        ? `<button class="nav-btn next" id="navNextBtn">Next: Day ${nextDay.day} ➜</button>`
+        : `<button class="nav-btn next" id="navNextBtn" disabled>🎓 That was the last day!</button>`}
+    </div>
+  </div>`;
+
+  html += `<div class="section-label">📗 Math — ${d.mathTitle}</div>`;
+  d.math.forEach((q,i)=> html += renderQuestion(q, i+1, "math"));
+
+  html += `<div class="section-label">📖 Reading — ${d.elaTitle}</div>`;
+  d.reading.forEach((m,mi)=>{
+    html += `<div class="reading-module"><div class="reading-grid">`;
+    html += `<div class="passage-box"><h4>📕 Read closely${m.placeholder?' (placeholder)':''}</h4><p>${m.passage}</p></div>`;
+    html += `<div class="rq-list">`;
+    m.questions.forEach((q,qi)=> html += renderQuestion(q, qi+1, "reading"));
+    html += `</div></div></div>`;
+  });
+
+  html += `<div class="day-footer">
+    <button class="nav-btn ghost" id="footBackBtn">← Back to Week ${d.week}</button>
+    ${nextDay ? `<button class="nav-btn ghost" id="footNextBtn">Go to Day ${nextDay.day} →</button>` : ""}
+    <button class="reset-day-btn" id="resetDayBtn" aria-label="Reset Day ${d.day} progress">↺ Reset this day</button>
+  </div>`;
+
+  dayModalBody.innerHTML = html;
+  dayQuestions(d).forEach(q=>wireQuestion(q));
+
+  const goBack = ()=>closeDay();
+  const goNext = ()=>{ if(nextDay) openDay(nextDay); };
+  document.getElementById("navBackBtn").addEventListener("click", goBack);
+  document.getElementById("footBackBtn").addEventListener("click", goBack);
+  const navNext = document.getElementById("navNextBtn");
+  if(navNext && nextDay) navNext.addEventListener("click", goNext);
+  const footNext = document.getElementById("footNextBtn");
+  if(footNext) footNext.addEventListener("click", goNext);
+
+  document.getElementById("resetDayBtn").addEventListener("click", ()=>{
+    if(confirm(`Reset all of Day ${d.day} for ${NAME}? This clears her answers and this day's analytics.`)){
+      resetDay(d);
+      renderDayBody(d);
+    }
+  });
+}
+
+function renderQuestion(q, num, kind){
+  const solved = !!STATE.solved[q.id];
+  let inner = `<div class="q-prompt"><span class="q-num">${kind==="math"?"Q"+num:num+"."}</span>${q.prompt}</div>`;
+  if(q.type==="mc"){
+    inner += `<fieldset class="choices" role="radiogroup" aria-label="Choose your answer"><legend>Choose one answer</legend>`;
+    q.choices.forEach((c,ci)=>{
+      const id = `${q.id}-c${ci}`;
+      inner += `<label class="choice" for="${id}"><input type="radio" id="${id}" name="${q.id}" value="${ci}" ${solved && ci===q.answer?'checked':''} ${solved?'disabled':''}> <span>${c}</span></label>`;
+    });
+    inner += `</fieldset>`;
+  } else {
+    const val = solved ? (q.accept[0]) : "";
+    inner += `<input class="text-answer" type="text" id="${q.id}-input" aria-label="Type your answer" value="${val}" ${solved?'disabled':''} autocomplete="off">`;
+  }
+  inner += `<div><button class="check-btn" id="${q.id}-btn" ${solved?'disabled':''}>${solved?'✓ Correct!':'Check Answer'}</button></div>`;
+  const fbText = solved ? `<div class="fb-title">✅ Great job, ${NAME}!</div>` : "";
+  inner += `<div class="feedback ${solved?'good show':''}" id="${q.id}-fb" role="status" aria-live="polite">${fbText}</div>`;
+  return `<div class="q ${solved?'solved':''}" id="${q.id}-wrap">${inner}</div>`;
+}
+
+function wireQuestion(q){
+  const btn = document.getElementById(`${q.id}-btn`);
+  if(q.type==="mc"){
+    document.querySelectorAll(`input[name="${q.id}"]`).forEach(inp=>{
+      inp.addEventListener("change", ()=>{
+        document.querySelectorAll(`#${q.id}-wrap label.choice`).forEach(l=>l.classList.remove("chosen"));
+        inp.closest("label.choice").classList.add("chosen");
+      });
+    });
+  }
+  if(btn && !STATE.solved[q.id]){
+    btn.addEventListener("click", ()=>checkQuestion(q));
+  }
+  if(q.type==="text"){
+    const inp = document.getElementById(`${q.id}-input`);
+    if(inp && !STATE.solved[q.id]){
+      inp.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); checkQuestion(q); } });
+    }
+  }
+}
+
+function checkQuestion(q){
+  let correct = false;
+  let answered = true;
+  if(q.type==="mc"){
+    const sel = document.querySelector(`input[name="${q.id}"]:checked`);
+    if(!sel){ answered = false; }
+    else correct = (parseInt(sel.value,10) === q.answer);
+  } else {
+    const inp = document.getElementById(`${q.id}-input`);
+    if(normalize(inp.value)===""){ answered = false; }
+    else correct = textCorrect(inp.value, q.accept);
+  }
+  const fb = document.getElementById(`${q.id}-fb`);
+  if(!answered){
+    fb.className = "feedback bad show";
+    fb.innerHTML = `<div class="fb-title">✏️ Give it a try first, ${NAME}!</div>Pick or type an answer, then press Check.`;
+    return;
+  }
+
+  recordAttempt(q, correct);
+
+  if(correct){
+    markSolved(q);
+    const wrap = document.getElementById(`${q.id}-wrap`);
+    wrap.classList.add("solved");
+    fb.className = "feedback good show";
+    fb.innerHTML = `<div class="fb-title">✅ Yes! Nice work, ${NAME}!</div>`;
+    const btn = document.getElementById(`${q.id}-btn`);
+    btn.disabled = true; btn.textContent = "✓ Correct!";
+    if(q.type==="mc") document.querySelectorAll(`input[name="${q.id}"]`).forEach(i=>i.disabled=true);
+    else document.getElementById(`${q.id}-input`).disabled = true;
+
+    const nowComplete = updateDayCompletion(currentDay);
+    if(nowComplete){
+      const banner = document.getElementById("dayBanner");
+      if(banner) banner.classList.add("show");
+      fireConfetti();
+    }
+  } else {
+    fb.className = "feedback bad show";
+    let steps = (q.hint||[]).map(h=>`<div class="hint-step"><span class="arrow">➜</span><span>${h}</span></div>`).join("");
+    fb.innerHTML = `<div class="fb-title">💡 Not quite — here's how it works:</div>${steps}<div style="margin-top:6px">Try again, ${NAME}! You've got this.</div>`;
+  }
+}
+
+/* ============================================================
+   CONFETTI (lightweight canvas)
+   ============================================================ */
+const confettiCanvas = document.getElementById("confetti");
+const cctx = confettiCanvas.getContext("2d");
+let confettiParticles = [];
+let confettiRAF = null;
+
+function sizeCanvas(){
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+}
+window.addEventListener("resize", sizeCanvas);
+
+function fireConfetti(){
+  sizeCanvas();
+  confettiCanvas.style.display = "block";
+  const cs = getComputedStyle(document.documentElement);
+  const cvar = n => (cs.getPropertyValue(n)||"").trim() || "#db2777";
+  const colors = [cvar("--pink"), cvar("--accent"), cvar("--deep-rose"), "#ffffff", cvar("--blush-2"), cvar("--deep-rose-2")];
+  confettiParticles = [];
+  const cx = window.innerWidth/2;
+  for(let i=0;i<140;i++){
+    confettiParticles.push({
+      x: cx + (Math.random()-0.5)*200,
+      y: window.innerHeight*0.35 + (Math.random()-0.5)*80,
+      vx: (Math.random()-0.5)*9,
+      vy: Math.random()*-9 - 3,
+      size: Math.random()*7 + 4,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      rot: Math.random()*Math.PI,
+      vr: (Math.random()-0.5)*0.3,
+      life: 0,
+    });
+  }
+  if(confettiRAF) cancelAnimationFrame(confettiRAF);
+  animateConfetti();
+}
+function animateConfetti(){
+  cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+  let alive = false;
+  confettiParticles.forEach(p=>{
+    p.life++;
+    p.vy += 0.22;
+    p.x += p.vx; p.y += p.vy;
+    p.rot += p.vr;
+    p.vx *= 0.99;
+    if(p.y < confettiCanvas.height + 30 && p.life < 200){
+      alive = true;
+      cctx.save();
+      cctx.translate(p.x,p.y);
+      cctx.rotate(p.rot);
+      cctx.fillStyle = p.color;
+      cctx.globalAlpha = Math.max(0, 1 - p.life/200);
+      cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+      cctx.restore();
+    }
+  });
+  if(alive){ confettiRAF = requestAnimationFrame(animateConfetti); }
+  else { confettiCanvas.style.display="none"; cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); }
+}
+
+/* ============================================================
+   PARENT ANALYTICS
+   ============================================================ */
+const analyticsOverlay = document.getElementById("analyticsOverlay");
+const analyticsBody = document.getElementById("analyticsBody");
+
+function computeAnalytics(){
+  const recs = Object.values(STATE.analytics);
+  const attempted = recs.filter(r=>r.attempts>0);
+  const solved = recs.filter(r=>r.solved);
+  const firstTry = solved.filter(r=>r.firstTry);
+  const totalRetries = recs.reduce((s,r)=>s+r.retries,0);
+  const firstTryAcc = attempted.length ? Math.round((firstTry.length/attempted.length)*100) : 0;
+
+  function subjStats(sub){
+    const s = attempted.filter(r=>r.subject===sub);
+    const ft = s.filter(r=>r.solved && r.firstTry).length;
+    const retries = s.reduce((a,r)=>a+r.retries,0);
+    const acc = s.length ? Math.round((ft/s.length)*100) : 0;
+    return {count:s.length, ft, retries, acc};
+  }
+
+  const topicMap = {};
+  attempted.forEach(r=>{
+    const key = r.standard + "||" + r.topic;
+    if(!topicMap[key]) topicMap[key] = {standard:r.standard, topic:r.topic, subject:r.subject, attempted:0, firstTry:0, retries:0, solved:0};
+    const t = topicMap[key];
+    t.attempted++;
+    if(r.solved) t.solved++;
+    if(r.solved && r.firstTry) t.firstTry++;
+    t.retries += r.retries;
+  });
+  const topics = Object.values(topicMap).map(t=>({ ...t, firstTryRate: t.attempted ? t.firstTry/t.attempted : 0 }));
+
+  const review = topics.filter(t=> t.retries>0 || t.firstTryRate<1)
+    .sort((a,b)=> (b.retries - a.retries) || (a.firstTryRate - b.firstTryRate));
+  const strong = topics.filter(t=> t.retries===0 && t.firstTryRate===1 && t.attempted>0)
+    .sort((a,b)=> b.attempted - a.attempted);
+
+  return {
+    solvedCount:solved.length, firstTryAcc, totalRetries,
+    daysDone: STATE.completedDays.length,
+    math: subjStats("Math"), reading: subjStats("Reading"),
+    review, strong,
+    hasData: attempted.length>0,
+  };
+}
+
+function renderAnalytics(){
+  const a = computeAnalytics();
+  let html = "";
+  html += `<div class="cards-row">
+    <div class="stat-card"><div class="num">${a.solvedCount}</div><div class="lbl">Questions Solved</div></div>
+    <div class="stat-card"><div class="num">${a.firstTryAcc}%</div><div class="lbl">First-Try Accuracy</div></div>
+    <div class="stat-card"><div class="num">${a.totalRetries}</div><div class="lbl">Total Retries</div></div>
+    <div class="stat-card"><div class="num">${a.daysDone}/28</div><div class="lbl">Days Completed</div></div>
+  </div>`;
+  if(!a.hasData){
+    html += `<div class="analytics-section"><p class="empty-note">No practice data yet. Once ${NAME} answers some questions, her mastery signals will appear here.</p></div>`;
+  } else {
+    html += `<div class="analytics-section"><h3>By Subject — First-Try Accuracy</h3>`;
+    html += subjRow("Math", a.math);
+    html += subjRow("Reading", a.reading);
+    html += `</div>`;
+    html += `<div class="analytics-section"><h3>🔎 Areas to Review <span style="font-weight:400;font-size:.85rem;color:var(--muted)">(ranked by struggle)</span></h3>`;
+    if(a.review.length===0){
+      html += `<p class="empty-note">No trouble spots yet — ${NAME} is nailing everything on the first try!</p>`;
+    } else {
+      a.review.forEach(t=>{
+        const rate = Math.round(t.firstTryRate*100);
+        html += `<div class="topic-item"><div class="std-code">${t.standard} · ${t.subject}</div><div class="topic-title">${t.topic}</div><div class="topic-meta">First-try: ${t.firstTry}/${t.attempted} (${rate}%) · Retries: ${t.retries}</div></div>`;
+      });
+    }
+    html += `</div>`;
+    html += `<div class="analytics-section"><h3>💪 Strong Areas</h3>`;
+    if(a.strong.length===0){
+      html += `<p class="empty-note">Strong topics will show here once ${NAME} solves a topic on the first try with no retries.</p>`;
+    } else {
+      a.strong.forEach(t=>{
+        html += `<div class="topic-item strong"><div class="std-code">${t.standard} · ${t.subject}</div><div class="topic-title">${t.topic}</div><div class="topic-meta">Solved ${t.firstTry}/${t.attempted} on the first try 🎉</div></div>`;
+      });
+    }
+    html += `</div>`;
+  }
+  html += `<div style="text-align:center;margin-top:8px"><button class="reset-analytics-btn" id="resetAnalyticsBtn">⚠️ Reset all analytics & progress</button></div>`;
+  analyticsBody.innerHTML = html;
+  document.getElementById("resetAnalyticsBtn").addEventListener("click", ()=>{
+    if(confirm(`Reset ALL of ${NAME}'s analytics and progress on this device? This cannot be undone.`)){
+      STATE = defaultState();
+      saveState();
+      renderAnalytics();
+      renderDashboard();
+    }
+  });
+}
+
+function subjRow(name, s){
+  return `<div class="subj-row"><div class="subj-name">${name}</div><div class="subj-bar-track"><div class="subj-bar-fill" style="width:${s.acc}%">${s.acc}%</div></div><div class="subj-meta">${s.ft}/${s.count} first-try<br>${s.retries} retries</div></div>`;
+}
+
+/* ============================================================
+   MODAL OPEN/CLOSE WIRING + ESC/focus
+   ============================================================ */
+document.getElementById("dayClose").addEventListener("click", closeDay);
+dayOverlay.addEventListener("click", e=>{ if(e.target===dayOverlay) closeDay(); });
+
+const analyticsBtn = document.getElementById("analyticsBtn");
+let lastFocusedA = null;
+function openAnalytics(){
+  lastFocusedA = document.activeElement;
+  renderAnalytics();
+  analyticsOverlay.classList.add("open");
+  document.body.style.overflow="hidden";
+  document.getElementById("analyticsClose").focus();
+}
+function closeAnalytics(){
+  analyticsOverlay.classList.remove("open");
+  document.body.style.overflow="";
+  if(lastFocusedA) lastFocusedA.focus();
+}
+analyticsBtn.addEventListener("click", openAnalytics);
+document.getElementById("analyticsClose").addEventListener("click", closeAnalytics);
+analyticsOverlay.addEventListener("click", e=>{ if(e.target===analyticsOverlay) closeAnalytics(); });
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"){
+    if(analyticsOverlay.classList.contains("open")) closeAnalytics();
+    else if(dayOverlay.classList.contains("open")) closeDay();
+  }
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+(function personaliseChrome(){
+  const h1 = document.querySelector("header.app-header h1");
+  if(h1) h1.innerHTML = `${FLOWER} Emma &amp; Leilani's 4th Grade Adventure`;
+  const w = document.getElementById("welcomeMsg");
+  if(w) w.textContent = `Welcome back, ${NAME}! Let's keep your 28-day launch going.`;
+  const at = document.getElementById("analyticsTitle");
+  if(at) at.textContent = `📊 Parent Analytics — ${NAME}`;
+  const stds = document.querySelector("#analyticsOverlay .modal-header .stds");
+  if(stds) stds.textContent = `A first-attempt view of where ${NAME} is thriving and where she needs review.`;
+  const prog = document.querySelector(".progress-top strong");
+  if(prog) prog.textContent = `${NAME}'s Progress`;
+  document.title = "Emma & Leilani's 4th Grade Adventure";
+})();
+
+sizeCanvas();
+renderDashboard();
+
+window.__APP__ = { CURRICULUM, STATE, normalize, textCorrect, frac, exp, dayQuestions, computeAnalytics, recordAttempt, isDayComplete, openDay, closeDay, openWeek, CHILD, NAME };
+</script>
+</body>
+</html>
